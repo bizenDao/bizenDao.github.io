@@ -70,6 +70,8 @@ npm run dev
 
 ### 本番環境
 
+**注意**: 現在、開発フェーズのため、本番ビルドでもプライベートチェーンを使用するように設定されています。
+
 ```bash
 # .envファイルで設定
 VITE_ENV=production
@@ -81,6 +83,18 @@ VITE_ENV=production
 # ビルド時は自動的に本番環境
 npm run build
 ```
+
+#### FORCE_PRIVATE_CHAINフラグについて
+
+`nft-mint-app/src/config.js`に`FORCE_PRIVATE_CHAIN`フラグが設定されています：
+
+```javascript
+// Force private chain flag (set to true during development phase)
+// TODO: Set to false when ready for production deployment on Polygon
+export const FORCE_PRIVATE_CHAIN = true;
+```
+
+このフラグが`true`の間は、本番ビルドでもプライベートチェーンが使用されます。Polygon Mainnetへのデプロイ準備が整ったら、このフラグを`false`に変更してください。
 
 ## コントラクトのデプロイ
 

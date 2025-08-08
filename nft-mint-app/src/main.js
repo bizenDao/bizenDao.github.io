@@ -1,7 +1,7 @@
 import './style.css';
 import { walletManager } from './wallet';
 import { nftMinter } from './mint';
-import { CHAIN_CONFIG, getExplorerUrl, getCurrencySymbol, isDevelopment } from './config';
+import { CHAIN_CONFIG, getExplorerUrl, getCurrencySymbol, isDevelopment, FORCE_PRIVATE_CHAIN } from './config';
 import { userProfileManager } from './userProfile';
 import { DEFAULT_AVATAR } from './imageUtils';
 
@@ -146,7 +146,7 @@ function render() {
     <div class="header">
       <h1>BizenDao Members Card</h1>
       <p class="subtitle">Mint your membership SBT directly from mobile browser</p>
-      ${isDevelopment ? '<p class="dev-notice">🛠️ Development Mode - Private Chain</p>' : ''}
+      ${(isDevelopment || FORCE_PRIVATE_CHAIN) ? '<p class="dev-notice">🛠️ Development Mode - Private Chain</p>' : ''}
     </div>
 
     ${state.message ? `

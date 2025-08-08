@@ -29,8 +29,12 @@ const PRODUCTION_CHAIN = {
 // Determine current environment
 export const isDevelopment = import.meta.env.VITE_ENV === 'development' || import.meta.env.DEV;
 
+// Force private chain flag (set to true during development phase)
+// TODO: Set to false when ready for production deployment on Polygon
+export const FORCE_PRIVATE_CHAIN = true;
+
 // Export the appropriate chain configuration
-export const CHAIN_CONFIG = isDevelopment ? DEVELOPMENT_CHAIN : PRODUCTION_CHAIN;
+export const CHAIN_CONFIG = (isDevelopment || FORCE_PRIVATE_CHAIN) ? DEVELOPMENT_CHAIN : PRODUCTION_CHAIN;
 
 // Contract address from environment variable or default
 export const NFT_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0x1234567890123456789012345678901234567890';
