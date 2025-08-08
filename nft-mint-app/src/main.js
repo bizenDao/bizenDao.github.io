@@ -3,7 +3,7 @@ import { walletManager } from './wallet';
 import { nftMinter } from './mint';
 import { CHAIN_CONFIG, getExplorerUrl, getCurrencySymbol, isDevelopment, FORCE_PRIVATE_CHAIN } from './config';
 import { userProfileManager } from './userProfile';
-import { DEFAULT_AVATAR } from './imageUtils';
+import { DEFAULT_AVATAR, processImageToBase64, validateImageFile, getBase64SizeKB } from './imageUtils';
 
 const app = document.querySelector('#app');
 
@@ -14,7 +14,13 @@ let state = {
   message: null,
   contractInfo: null,
   hasMinted: false,
-  profileElement: null
+  profileElement: null,
+  mintFormData: {
+    memberName: '',
+    discordId: '',
+    avatarImage: null,
+    avatarPreview: null
+  }
 };
 
 function setState(updates) {
@@ -102,6 +108,17 @@ async function disconnectWallet() {
 }
 
 async function mintNFT() {
+  // Validate form
+  if (!state.mintFormData.memberName.trim()) {
+    showMessage('Please enter your member name', 'error');
+    return;
+  }
+  
+  if (!state.mintFormData.discordId.trim()) {
+    showMessage('Please enter your Discord ID', 'error');
+    return;
+  }
+  
   setState({ isLoading: true, message: null });
   
   try {
@@ -109,13 +126,36 @@ async function mintNFT() {
     
     const result = await nftMinter.mint(1); // SBT is always 1 per address
     
+    // Wait for transaction to be mined
+    showMessage('Membership card minted! Setting up your profile...', 'info');
+    
+    // Initialize user profile manager if not already done
+    await userProfileManager.initialize();
+    
+    // Set user info
+    await userProfileManager.setUserInfo({
+      memberName: state.mintFormData.memberName.trim(),
+      discordId: state.mintFormData.discordId.trim(),
+      avatarImage: state.mintFormData.avatarImage || ''
+    });
+    
     setState({ isLoading: false });
     
     const explorerUrl = getExplorerUrl(result.transactionHash);
     const successMessage = explorerUrl 
-      ? `Membership card minted successfully! <a href="${explorerUrl}" target="_blank" class="transaction-link">View transaction</a>`
-      : `Membership card minted successfully! Transaction: ${result.transactionHash}`;
+      ? `Membership card minted and profile set! <a href="${explorerUrl}" target="_blank" class="transaction-link">View transaction</a>`
+      : `Membership card minted and profile set! Transaction: ${result.transactionHash}`;
     showMessage(successMessage, 'success');
+    
+    // Clear form data
+    setState({
+      mintFormData: {
+        memberName: '',
+        discordId: '',
+        avatarImage: null,
+        avatarPreview: null
+      }
+    });
     
     // Refresh contract data and load profile UI
     await loadContractInfo();
@@ -192,9 +232,62 @@ function render() {
                 <p class="sbt-notice">🆓 Free mint (gas only)</p>
               </div>
 
-              <button onclick="window.app.mintNFT()" ${state.isLoading ? 'disabled' : ''}>
-                ${state.isLoading ? '<span class="loading"></span>Minting...' : 'Mint Membership Card'}
-              </button>
+              <div class="mint-form">
+                <h3>Member Information</h3>
+                
+                <div class="form-group">
+                  <label for="mintMemberName">Member Name *</label>
+                  <input 
+                    type="text" 
+                    id="mintMemberName" 
+                    placeholder="Enter your name" 
+                    maxlength="50"
+                    value="${state.mintFormData.memberName}"
+                    onchange="window.app.updateMintForm('memberName', this.value)"
+                    ${state.isLoading ? 'disabled' : ''}
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label for="mintDiscordId">Discord ID *</label>
+                  <input 
+                    type="text" 
+                    id="mintDiscordId" 
+                    placeholder="username#1234" 
+                    maxlength="50"
+                    value="${state.mintFormData.discordId}"
+                    onchange="window.app.updateMintForm('discordId', this.value)"
+                    ${state.isLoading ? 'disabled' : ''}
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label>Avatar Image (Optional)</label>
+                  <div class="avatar-upload-section">
+                    ${state.mintFormData.avatarPreview ? `
+                      <div class="avatar-preview-mint">
+                        <img src="${state.mintFormData.avatarPreview}" alt="Avatar preview" />
+                        <button class="remove-avatar" onclick="window.app.removeAvatar()" ${state.isLoading ? 'disabled' : ''}>×</button>
+                      </div>
+                    ` : `
+                      <div class="avatar-placeholder">
+                        <img src="${DEFAULT_AVATAR}" alt="Default avatar" />
+                      </div>
+                    `}
+                    <div class="avatar-upload-controls">
+                      <input type="file" id="mintAvatarInput" accept="image/*" style="display: none;" onchange="window.app.handleAvatarUpload(event)" />
+                      <button class="secondary small" onclick="document.getElementById('mintAvatarInput').click()" ${state.isLoading ? 'disabled' : ''}>
+                        ${state.mintFormData.avatarPreview ? 'Change Avatar' : 'Choose Avatar'}
+                      </button>
+                      <p class="avatar-info">Max 200x200px, 100KB</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button onclick="window.app.mintNFT()" ${state.isLoading ? 'disabled' : ''} class="mint-button">
+                  ${state.isLoading ? '<span class="loading"></span>Minting...' : 'Mint Membership Card'}
+                </button>
+              </div>
             </div>
           ` : `
             <div class="loading-contract">
@@ -218,12 +311,79 @@ function render() {
   }
 }
 
+// Form handling functions
+async function handleAvatarUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  try {
+    const validation = validateImageFile(file, {
+      maxSizeMB: 1,
+      allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    });
+    
+    if (!validation.valid) {
+      showMessage(validation.error, 'error');
+      return;
+    }
+    
+    const base64Image = await processImageToBase64(file, {
+      maxWidth: 200,
+      maxHeight: 200,
+      quality: 0.7
+    });
+    
+    // Check size
+    const sizeKB = getBase64SizeKB(base64Image);
+    if (sizeKB > 100) {
+      showMessage(`Image too large (${sizeKB}KB). Maximum: 100KB`, 'error');
+      return;
+    }
+    
+    setState({
+      mintFormData: {
+        ...state.mintFormData,
+        avatarImage: base64Image,
+        avatarPreview: base64Image
+      }
+    });
+  } catch (error) {
+    showMessage('Failed to process image', 'error');
+  }
+}
+
+function updateMintForm(field, value) {
+  setState({
+    mintFormData: {
+      ...state.mintFormData,
+      [field]: value
+    }
+  });
+}
+
+function removeAvatar() {
+  setState({
+    mintFormData: {
+      ...state.mintFormData,
+      avatarImage: null,
+      avatarPreview: null
+    }
+  });
+  
+  // Reset file input
+  const fileInput = document.getElementById('mintAvatarInput');
+  if (fileInput) fileInput.value = '';
+}
+
 // Make functions available globally for onclick handlers
 window.app = {
   connectWallet,
   disconnectWallet,
   mintNFT,
-  updateQuantity
+  updateQuantity,
+  handleAvatarUpload,
+  updateMintForm,
+  removeAvatar
 };
 
 // Initial render
