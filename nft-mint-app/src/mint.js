@@ -51,37 +51,33 @@ class NFTMinter {
     }
 
     try {
-      const totalPrice = this.mintPrice * BigInt(quantity);
+      // Check if already minted (SBT allows only one per address)
+      const hasMinted = await this.contract.hasMinted(walletManager.getAccount());
+      if (hasMinted) {
+        throw new Error('You have already minted your membership card');
+      }
       
+      // SBT mint is free (no value needed)
       // Estimate gas
-      const gasEstimate = await this.contract.mint.estimateGas(
-        walletManager.getAccount(),
-        { value: totalPrice }
-      );
+      const gasEstimate = await this.contract.mint.estimateGas();
 
       // Add 10% buffer to gas estimate
       const gasLimit = (gasEstimate * 110n) / 100n;
 
       // Send transaction
-      const tx = await this.contract.mint(
-        walletManager.getAccount(),
-        { 
-          value: totalPrice,
-          gasLimit: gasLimit
-        }
-      );
+      const tx = await this.contract.mint({ gasLimit });
 
       // Wait for transaction confirmation
       const receipt = await tx.wait();
       
-      // Find Transfer event to get token ID
-      const transferEvent = receipt.logs.find(
-        log => log.topics[0] === ethers.id('Transfer(address,address,uint256)')
+      // Find Mint event to get token ID
+      const mintEvent = receipt.logs.find(
+        log => log.topics[0] === ethers.id('Mint(address,uint256)')
       );
 
       let tokenId = null;
-      if (transferEvent) {
-        tokenId = ethers.toBigInt(transferEvent.topics[3]).toString();
+      if (mintEvent) {
+        tokenId = ethers.toBigInt(mintEvent.topics[2]).toString();
       }
 
       return {

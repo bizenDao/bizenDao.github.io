@@ -245,6 +245,19 @@ button.secondary:hover {
   display: inline-block;
 }
 
+.sbt-info {
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sbt-notice {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

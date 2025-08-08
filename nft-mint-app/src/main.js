@@ -73,14 +73,14 @@ async function mintNFT() {
   try {
     showMessage('Transaction pending...', 'info');
     
-    const result = await nftMinter.mint(state.mintQuantity);
+    const result = await nftMinter.mint(1); // SBT is always 1 per address
     
-    setState({ isLoading: false, mintQuantity: 1 });
+    setState({ isLoading: false });
     
     const explorerUrl = getExplorerUrl(result.transactionHash);
     const successMessage = explorerUrl 
-      ? `NFT minted successfully! <a href="${explorerUrl}" target="_blank" class="transaction-link">View transaction</a>`
-      : `NFT minted successfully! Transaction: ${result.transactionHash}`;
+      ? `Membership card minted successfully! <a href="${explorerUrl}" target="_blank" class="transaction-link">View transaction</a>`
+      : `Membership card minted successfully! Transaction: ${result.transactionHash}`;
     showMessage(successMessage, 'success');
     
     // Refresh contract data
@@ -90,9 +90,11 @@ async function mintNFT() {
     console.error('Minting error:', error);
     setState({ isLoading: false });
     
-    let errorMessage = 'Failed to mint NFT';
-    if (error.message.includes('insufficient funds')) {
-      errorMessage = 'Insufficient funds for transaction';
+    let errorMessage = 'Failed to mint membership card';
+    if (error.message.includes('already minted')) {
+      errorMessage = 'You have already minted your membership card';
+    } else if (error.message.includes('insufficient funds')) {
+      errorMessage = 'Insufficient funds for gas fees';
     } else if (error.message.includes('user rejected')) {
       errorMessage = 'Transaction cancelled by user';
     }
@@ -109,8 +111,8 @@ function updateQuantity(delta) {
 function render() {
   app.innerHTML = `
     <div class="header">
-      <h1>NFT Mint App</h1>
-      <p class="subtitle">Mint your NFT directly from mobile browser</p>
+      <h1>BizenDao Members Card</h1>
+      <p class="subtitle">Mint your membership SBT directly from mobile browser</p>
       ${isDevelopment ? '<p class="dev-notice">🛠️ Development Mode - Private Chain</p>' : ''}
     </div>
 
@@ -141,7 +143,7 @@ function render() {
           <div class="contract-info">
             <div class="info-item">
               <div class="info-label">Price</div>
-              <div class="info-value">${state.contractInfo.mintPrice} ${getCurrencySymbol()}</div>
+              <div class="info-value">FREE</div>
             </div>
             <div class="info-item">
               <div class="info-label">Minted</div>
@@ -150,18 +152,14 @@ function render() {
           </div>
 
           <div class="mint-controls">
-            <div class="quantity-selector">
-              <button class="quantity-button secondary" onclick="window.app.updateQuantity(-1)">-</button>
-              <span class="quantity">${state.mintQuantity}</span>
-              <button class="quantity-button secondary" onclick="window.app.updateQuantity(1)">+</button>
-            </div>
-            
-            <div class="total-price">
-              Total: ${(parseFloat(state.contractInfo.mintPrice) * state.mintQuantity).toFixed(4)} ${getCurrencySymbol()}
+            <div class="sbt-info">
+              <p class="sbt-notice">🎫 One membership card per wallet</p>
+              <p class="sbt-notice">💎 Soul Bound Token (Non-transferable)</p>
+              <p class="sbt-notice">🆓 Free mint (gas only)</p>
             </div>
 
             <button onclick="window.app.mintNFT()" ${state.isLoading ? 'disabled' : ''}>
-              ${state.isLoading ? '<span class="loading"></span>Minting...' : 'Mint NFT'}
+              ${state.isLoading ? '<span class="loading"></span>Minting...' : 'Mint Membership Card'}
             </button>
           </div>
         ` : `
