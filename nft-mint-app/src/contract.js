@@ -130,6 +130,89 @@ export const NFT_CONTRACT_ABI = [
     ],
     "name": "Mint",
     "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "memberName",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "discordId",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "avatarUrl",
+        "type": "string"
+      }
+    ],
+    "name": "setUserInfo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getUserInfo",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "memberName",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "discordId",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "avatarUrl",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "memberName",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "discordId",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "avatarUrl",
+        "type": "string"
+      }
+    ],
+    "name": "UserInfoUpdated",
+    "type": "event"
   }
 ];
 

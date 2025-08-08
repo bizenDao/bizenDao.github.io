@@ -10,6 +10,7 @@ BizenDao Members SBTは、BizenDaoのメンバーシップカードとして機�
 - **1アカウント1枚限定**: 各アドレスは1つのSBTのみ保有可能
 - **譲渡不可（Soul Bound）**: トークンの譲渡・売買は不可能
 - **オーナー権限でのBURN**: コントラクトオーナーのみがトークンをBURN可能
+- **ユーザー情報管理**: メンバー名、Discord ID、アバターURLを保存可能
 
 ## コントラクト仕様
 
@@ -38,6 +39,20 @@ function tokenOfOwner(address account) external view returns (uint256)
 
 // アドレスがミント済みか確認
 function hasMinted(address account) external view returns (bool)
+
+// ユーザー情報を設定（トークン保有者のみ）
+function setUserInfo(
+    string memory memberName,
+    string memory discordId,
+    string memory avatarUrl
+) external
+
+// ユーザー情報を取得
+function getUserInfo(address user) external view returns (
+    string memory memberName,
+    string memory discordId,
+    string memory avatarUrl
+)
 ```
 
 #### オーナー向け関数
@@ -115,11 +130,28 @@ const tokenId = await contract.tokenOfOwner(userAddress);
 await contract.burn(tokenId);
 ```
 
+### ユーザー情報の設定
+```javascript
+// ユーザー情報を設定（トークン保有者のみ）
+await contract.setUserInfo(
+    "Taro Yamada",           // メンバー名
+    "taro#1234",             // Discord ID
+    "https://example.com/avatar.png"  // アバターURL
+);
+```
+
+### ユーザー情報の取得
+```javascript
+// 特定のアドレスのユーザー情報を取得
+const [memberName, discordId, avatarUrl] = await contract.getUserInfo(userAddress);
+```
+
 ## セキュリティ考慮事項
 
 1. **オーナー権限**: オーナーアドレスは安全に管理してください
-2. **BURN機能**: 誤ってBURNしないよう注意が必要です
+2. **BURN機能**: 誤ってBURNしないよう注意が必要です（ユーザー情報も削除されます）
 3. **再ミント不可**: 一度BURNされたアドレスは再度ミントできません
+4. **個人情報**: ユーザー情報はブロックチェーン上に公開されるため、適切な情報のみ設定してください
 
 ## ライセンス
 

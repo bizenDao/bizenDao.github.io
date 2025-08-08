@@ -30,11 +30,22 @@ contract BizenDaoMembersSBT {
     // Mapping from owner address to mint status
     mapping(address => bool) private _hasMinted;
     
+    // User information structure
+    struct UserInfo {
+        string memberName;
+        string discordId;
+        string avatarUrl;
+    }
+    
+    // Mapping from address to user information
+    mapping(address => UserInfo) private _userInfo;
+    
     // Events
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
     event Mint(address indexed to, uint256 indexed tokenId);
     event Burn(uint256 indexed tokenId);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event UserInfoUpdated(address indexed user, string memberName, string discordId, string avatarUrl);
     
     // Modifiers
     modifier onlyOwner() {
@@ -85,6 +96,7 @@ contract BizenDaoMembersSBT {
         delete _owners[tokenId];
         delete _tokenOfOwner[tokenOwner];
         delete _hasMinted[tokenOwner];
+        delete _userInfo[tokenOwner];
         
         emit Transfer(tokenOwner, address(0), tokenId);
         emit Burn(tokenId);
@@ -153,6 +165,45 @@ contract BizenDaoMembersSBT {
      */
     function maxSupply() external pure returns (uint256) {
         return type(uint256).max;
+    }
+    
+    /**
+     * @notice Set user information
+     * @param memberName The member's display name
+     * @param discordId The member's Discord ID
+     * @param avatarUrl The member's avatar URL
+     * @dev Only the token holder can update their own information
+     */
+    function setUserInfo(
+        string memory memberName,
+        string memory discordId,
+        string memory avatarUrl
+    ) external {
+        require(_hasMinted[msg.sender], "Must hold a token to set user info");
+        
+        _userInfo[msg.sender] = UserInfo({
+            memberName: memberName,
+            discordId: discordId,
+            avatarUrl: avatarUrl
+        });
+        
+        emit UserInfoUpdated(msg.sender, memberName, discordId, avatarUrl);
+    }
+    
+    /**
+     * @notice Get user information
+     * @param user The address to query
+     * @return memberName The member's display name
+     * @return discordId The member's Discord ID
+     * @return avatarUrl The member's avatar URL
+     */
+    function getUserInfo(address user) external view returns (
+        string memory memberName,
+        string memory discordId,
+        string memory avatarUrl
+    ) {
+        UserInfo memory info = _userInfo[user];
+        return (info.memberName, info.discordId, info.avatarUrl);
     }
     
     /**
