@@ -90,10 +90,6 @@ class UserProfileManager {
       throw new Error('Member name is required');
     }
 
-    if (!discordId || discordId.trim().length === 0) {
-      throw new Error('Discord ID is required');
-    }
-
     // Use empty string if no avatar provided (contract will use default)
     const avatar = avatarImage || '';
 
@@ -108,7 +104,7 @@ class UserProfileManager {
     try {
       const tx = await this.contract.setUserInfo(
         memberName.trim(),
-        discordId.trim(),
+        discordId ? discordId.trim() : '',
         avatar
       );
 
@@ -117,7 +113,7 @@ class UserProfileManager {
       // Update cached info
       this.currentUserInfo = {
         memberName: memberName.trim(),
-        discordId: discordId.trim(),
+        discordId: discordId ? discordId.trim() : '',
         avatarImage: avatar || DEFAULT_AVATAR,
         address: walletManager.getAccount()
       };

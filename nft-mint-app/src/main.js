@@ -114,11 +114,6 @@ async function mintNFT() {
     return;
   }
   
-  if (!state.mintFormData.discordId.trim()) {
-    showMessage('Please enter your Discord ID', 'error');
-    return;
-  }
-  
   setState({ isLoading: true, message: null });
   
   try {
@@ -135,7 +130,7 @@ async function mintNFT() {
     // Set user info
     await userProfileManager.setUserInfo({
       memberName: state.mintFormData.memberName.trim(),
-      discordId: state.mintFormData.discordId.trim(),
+      discordId: state.mintFormData.discordId.trim() || '',
       avatarImage: state.mintFormData.avatarImage || ''
     });
     
@@ -249,7 +244,7 @@ function render() {
                 </div>
                 
                 <div class="form-group">
-                  <label for="mintDiscordId">Discord ID *</label>
+                  <label for="mintDiscordId">Discord ID (Optional)</label>
                   <input 
                     type="text" 
                     id="mintDiscordId" 
