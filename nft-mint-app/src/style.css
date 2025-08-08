@@ -3,9 +3,9 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #1a1a1a;
+  color-scheme: light;
+  color: #213547;
+  background-color: #f8f9fa;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -23,6 +23,7 @@ body {
   padding: 0;
   min-height: 100vh;
   min-height: -webkit-fill-available;
+  background-color: #f8f9fa;
 }
 
 #app {
@@ -50,17 +51,18 @@ h1 {
 }
 
 .subtitle {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(33, 53, 71, 0.7);
   font-size: 1rem;
   margin: 0;
 }
 
 .wallet-section {
-  background: rgba(255, 255, 255, 0.05);
+  background: white;
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .wallet-info {
@@ -73,7 +75,7 @@ h1 {
 .wallet-address {
   font-family: monospace;
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(33, 53, 71, 0.8);
 }
 
 button {
@@ -107,21 +109,23 @@ button:disabled {
 }
 
 button.secondary {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(33, 53, 71, 0.05);
+  border: 1px solid rgba(33, 53, 71, 0.15);
+  color: #213547;
 }
 
 button.secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: none;
+  background: rgba(33, 53, 71, 0.1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
 .mint-section {
-  background: rgba(255, 255, 255, 0.05);
+  background: white;
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .contract-info {
@@ -132,21 +136,23 @@ button.secondary:hover {
 }
 
 .info-item {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(102, 126, 234, 0.05);
   padding: 1rem;
   border-radius: 8px;
   text-align: center;
+  border: 1px solid rgba(102, 126, 234, 0.1);
 }
 
 .info-label {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(33, 53, 71, 0.6);
   margin-bottom: 0.25rem;
 }
 
 .info-value {
   font-size: 1.2rem;
   font-weight: 600;
+  color: #213547;
 }
 
 .mint-controls {
@@ -183,7 +189,7 @@ button.secondary:hover {
   text-align: center;
   margin-bottom: 1rem;
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(33, 53, 71, 0.8);
 }
 
 .message {
@@ -216,9 +222,9 @@ button.secondary:hover {
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  border: 3px solid rgba(102, 126, 234, 0.3);
   border-radius: 50%;
-  border-top-color: white;
+  border-top-color: #667eea;
   animation: spin 1s ease-in-out infinite;
   margin-right: 0.5rem;
   vertical-align: middle;
@@ -231,13 +237,13 @@ button.secondary:hover {
 
 .loading-contract p {
   margin-top: 1rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(33, 53, 71, 0.6);
 }
 
 .dev-notice {
   background: rgba(255, 193, 7, 0.1);
   border: 1px solid rgba(255, 193, 7, 0.3);
-  color: #ffc107;
+  color: #f59e0b;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   font-size: 0.85rem;
@@ -250,12 +256,13 @@ button.secondary:hover {
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1.5rem;
+  border: 1px solid rgba(102, 126, 234, 0.1);
 }
 
 .sbt-notice {
   margin: 0.5rem 0;
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(33, 53, 71, 0.8);
 }
 
 @keyframes spin {
@@ -295,92 +302,16 @@ button.secondary:hover {
   }
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #f5f5f7;
-  }
-
-  .wallet-section,
-  .mint-section {
-    background: white;
-    border-color: rgba(0, 0, 0, 0.1);
-  }
-
-  .wallet-address {
-    color: rgba(0, 0, 0, 0.8);
-  }
-
-  .info-item {
-    background: rgba(0, 0, 0, 0.05);
-  }
-
-  .info-label {
-    color: rgba(0, 0, 0, 0.6);
-  }
-
-  .subtitle {
-    color: rgba(0, 0, 0, 0.6);
-  }
-
-  .total-price {
-    color: rgba(0, 0, 0, 0.8);
-  }
-
-  button.secondary {
-    background: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.1);
-    color: #213547;
-  }
-
-  button.secondary:hover {
-    background: rgba(0, 0, 0, 0.08);
-  }
-
-  .loading {
-    border-color: rgba(0, 0, 0, 0.3);
-    border-top-color: #213547;
-  }
-
-  .user-profile-container {
-    background: white;
-    border-color: rgba(0, 0, 0, 0.1);
-  }
-
-  .form-group label {
-    color: rgba(0, 0, 0, 0.8);
-  }
-
-  .form-group input {
-    background: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.1);
-    color: #213547;
-  }
-
-  .avatar-info {
-    color: rgba(0, 0, 0, 0.6);
-  }
-
-  .profile-subtitle {
-    color: rgba(0, 0, 0, 0.6);
-  }
-
-  .mint-form {
-    border-top-color: rgba(0, 0, 0, 0.1);
-  }
-
-  .mint-form h3 {
-    color: rgba(0, 0, 0, 0.9);
-  }
-}
+/* Light theme is now default - removed media query */
 
 /* User Profile Styles */
 .user-profile-container {
-  background: rgba(255, 255, 255, 0.05);
+  background: white;
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .profile-header {
@@ -398,7 +329,7 @@ button.secondary:hover {
 }
 
 .profile-subtitle {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(33, 53, 71, 0.6);
   font-size: 0.9rem;
   margin: 0;
 }
@@ -414,7 +345,7 @@ button.secondary:hover {
   gap: 1.5rem;
   margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .avatar-preview {
@@ -438,7 +369,7 @@ button.secondary:hover {
 
 .avatar-info {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(33, 53, 71, 0.6);
   margin: 0;
 }
 
@@ -451,16 +382,16 @@ button.secondary:hover {
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(33, 53, 71, 0.9);
 }
 
 .form-group input {
   width: 100%;
   padding: 0.75rem;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.02);
+  color: #213547;
   font-size: 1rem;
   font-family: inherit;
   transition: all 0.25s ease;
@@ -469,11 +400,12 @@ button.secondary:hover {
 .form-group input:focus {
   outline: none;
   border-color: #667eea;
-  background: rgba(255, 255, 255, 0.08);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .form-group input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(33, 53, 71, 0.4);
 }
 
 .profile-actions {
@@ -510,13 +442,13 @@ button.small {
 .mint-form {
   margin-top: 2rem;
   padding-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .mint-form h3 {
   margin: 0 0 1.5rem 0;
   font-size: 1.25rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(33, 53, 71, 0.9);
 }
 
 .avatar-upload-section {
