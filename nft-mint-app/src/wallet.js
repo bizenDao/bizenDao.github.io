@@ -1,6 +1,6 @@
 import { MetaMaskSDK } from '@metamask/sdk';
 import { ethers } from 'ethers';
-import { CHAIN_CONFIG } from './contract';
+import { CHAIN_CONFIG } from './config';
 
 // Initialize MetaMask SDK
 const MMSDK = new MetaMaskSDK({

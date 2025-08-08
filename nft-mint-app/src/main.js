@@ -1,6 +1,7 @@
 import './style.css';
 import { walletManager } from './wallet';
 import { nftMinter } from './mint';
+import { CHAIN_CONFIG, getExplorerUrl, getCurrencySymbol, isDevelopment } from './config';
 
 const app = document.querySelector('#app');
 
@@ -76,11 +77,11 @@ async function mintNFT() {
     
     setState({ isLoading: false, mintQuantity: 1 });
     
-    const explorerUrl = `https://polygonscan.com/tx/${result.transactionHash}`;
-    showMessage(
-      `NFT minted successfully! <a href="${explorerUrl}" target="_blank" class="transaction-link">View transaction</a>`,
-      'success'
-    );
+    const explorerUrl = getExplorerUrl(result.transactionHash);
+    const successMessage = explorerUrl 
+      ? `NFT minted successfully! <a href="${explorerUrl}" target="_blank" class="transaction-link">View transaction</a>`
+      : `NFT minted successfully! Transaction: ${result.transactionHash}`;
+    showMessage(successMessage, 'success');
     
     // Refresh contract data
     const contractInfo = await nftMinter.fetchContractData();
@@ -110,6 +111,7 @@ function render() {
     <div class="header">
       <h1>NFT Mint App</h1>
       <p class="subtitle">Mint your NFT directly from mobile browser</p>
+      ${isDevelopment ? '<p class="dev-notice">🛠️ Development Mode - Private Chain</p>' : ''}
     </div>
 
     ${state.message ? `
@@ -139,7 +141,7 @@ function render() {
           <div class="contract-info">
             <div class="info-item">
               <div class="info-label">Price</div>
-              <div class="info-value">${state.contractInfo.mintPrice} MATIC</div>
+              <div class="info-value">${state.contractInfo.mintPrice} ${getCurrencySymbol()}</div>
             </div>
             <div class="info-item">
               <div class="info-label">Minted</div>
@@ -155,7 +157,7 @@ function render() {
             </div>
             
             <div class="total-price">
-              Total: ${(parseFloat(state.contractInfo.mintPrice) * state.mintQuantity).toFixed(4)} MATIC
+              Total: ${(parseFloat(state.contractInfo.mintPrice) * state.mintQuantity).toFixed(4)} ${getCurrencySymbol()}
             </div>
 
             <button onclick="window.app.mintNFT()" ${state.isLoading ? 'disabled' : ''}>

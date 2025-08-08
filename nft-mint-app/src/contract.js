@@ -1,6 +1,5 @@
 // NFT Contract Configuration
-// Replace with your actual contract address and ABI
-export const NFT_CONTRACT_ADDRESS = '0x1234567890123456789012345678901234567890';
+import { NFT_CONTRACT_ADDRESS } from './config';
 
 // Minimal ERC721 ABI for minting
 export const NFT_CONTRACT_ABI = [
@@ -83,15 +82,5 @@ export const NFT_CONTRACT_ABI = [
   }
 ];
 
-// Chain configuration - Polygon Mainnet
-export const CHAIN_CONFIG = {
-  chainId: '0x89', // Polygon Mainnet (137 in decimal)
-  chainName: 'Polygon Mainnet',
-  nativeCurrency: {
-    name: 'MATIC',
-    symbol: 'MATIC',
-    decimals: 18
-  },
-  rpcUrls: ['https://polygon-rpc.com/', 'https://rpc-mainnet.maticvigil.com/'],
-  blockExplorerUrls: ['https://polygonscan.com/']
-};
+// Export NFT contract address and ABI
+export { NFT_CONTRACT_ADDRESS };

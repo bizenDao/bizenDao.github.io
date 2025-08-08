@@ -13,6 +13,9 @@ NFTミントアプリケーションをGitHub Pagesにデプロイする詳細�
 ### [SMART_CONTRACT_DEPLOYMENT.md](./SMART_CONTRACT_DEPLOYMENT.md)
 REMIX IDEを使用してスマートコントラクトをPolygon Mainnetにデプロイする手順です。
 
+### [DEVELOPMENT_SETUP.md](./DEVELOPMENT_SETUP.md)
+プライベートチェーンを使用した開発環境のセットアップガイドです。
+
 ## クイックリンク
 
 - **アプリケーションURL**: [https://bizendao.github.io/](https://bizendao.github.io/)
@@ -21,6 +24,7 @@ REMIX IDEを使用してスマートコントラクトをPolygon Mainnetにデ�
 ## 目次
 
 1. **開発者向け**
+   - [開発環境セットアップ](./DEVELOPMENT_SETUP.md)
    - [NFTミントアプリの技術仕様](./NFT_MINT_APP.md)
    - [スマートコントラクトデプロイ](./SMART_CONTRACT_DEPLOYMENT.md)
    - [アプリケーションデプロイ](./DEPLOYMENT.md)
