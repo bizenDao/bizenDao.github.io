@@ -29,7 +29,7 @@ cp .env.example .env
 VITE_ENV=development
 
 # 開発環境用のコントラクトアドレス
-VITE_CONTRACT_ADDRESS=0x... # REMIXでデプロイしたアドレス
+VITE_CONTRACT_ADDRESS=0x166748e744195650a94FC32C64d8f0c9329f96F1 # REMIXでデプロイしたアドレス
 
 # オプション: Infura API Key（バックアップRPC用）
 VITE_INFURA_API_KEY=

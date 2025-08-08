@@ -37,7 +37,8 @@ export const FORCE_PRIVATE_CHAIN = true;
 export const CHAIN_CONFIG = (isDevelopment || FORCE_PRIVATE_CHAIN) ? DEVELOPMENT_CHAIN : PRODUCTION_CHAIN;
 
 // Contract address from environment variable or default
-export const NFT_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0x1234567890123456789012345678901234567890';
+// Private Chain deployed contract: 0x166748e744195650a94FC32C64d8f0c9329f96F1
+export const NFT_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0x166748e744195650a94FC32C64d8f0c9329f96F1';
 
 // Helper functions
 export function getExplorerUrl(hash, type = 'tx') {
