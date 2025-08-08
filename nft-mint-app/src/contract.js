@@ -83,15 +83,15 @@ export const NFT_CONTRACT_ABI = [
   }
 ];
 
-// Chain configuration
+// Chain configuration - Polygon Mainnet
 export const CHAIN_CONFIG = {
-  chainId: '0x1', // Ethereum Mainnet
-  chainName: 'Ethereum Mainnet',
+  chainId: '0x89', // Polygon Mainnet (137 in decimal)
+  chainName: 'Polygon Mainnet',
   nativeCurrency: {
-    name: 'Ether',
-    symbol: 'ETH',
+    name: 'MATIC',
+    symbol: 'MATIC',
     decimals: 18
   },
-  rpcUrls: ['https://mainnet.infura.io/v3/'],
-  blockExplorerUrls: ['https://etherscan.io']
+  rpcUrls: ['https://polygon-rpc.com/', 'https://rpc-mainnet.maticvigil.com/'],
+  blockExplorerUrls: ['https://polygonscan.com/']
 };

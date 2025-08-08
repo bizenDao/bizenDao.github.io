@@ -10,6 +10,9 @@ NFTミントアプリケーションの概要、機能、セットアップ方�
 ### [DEPLOYMENT.md](./DEPLOYMENT.md)
 NFTミントアプリケーションをGitHub Pagesにデプロイする詳細な手順とトラブルシューティングガイドです。
 
+### [SMART_CONTRACT_DEPLOYMENT.md](./SMART_CONTRACT_DEPLOYMENT.md)
+REMIX IDEを使用してスマートコントラクトをPolygon Mainnetにデプロイする手順です。
+
 ## クイックリンク
 
 - **アプリケーションURL**: [https://bizendao.github.io/](https://bizendao.github.io/)
@@ -19,7 +22,8 @@ NFTミントアプリケーションをGitHub Pagesにデプロイする詳細�
 
 1. **開発者向け**
    - [NFTミントアプリの技術仕様](./NFT_MINT_APP.md)
-   - [デプロイメント手順](./DEPLOYMENT.md)
+   - [スマートコントラクトデプロイ](./SMART_CONTRACT_DEPLOYMENT.md)
+   - [アプリケーションデプロイ](./DEPLOYMENT.md)
 
 2. **運用者向け**
    - [デプロイ方法](./DEPLOYMENT.md#デプロイ手順)

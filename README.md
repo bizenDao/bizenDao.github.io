@@ -1,6 +1,6 @@
 # BizenDao NFT Mint App
 
-スマートフォンから簡単にNFTをミントできるWebアプリケーション
+スマートフォンから簡単に NFT をミントできる Web アプリケーション
 
 ## 🌐 デモ
 
@@ -8,27 +8,27 @@
 
 ## 📱 特徴
 
-- **モバイルファースト**: スマートフォンの標準ブラウザから直接NFTをミント可能
-- **MetaMask SDK統合**: シームレスなウォレット接続体験
+- **モバイルファースト**: スマートフォンの標準ブラウザから直接 NFT をミント可能
+- **MetaMask SDK 統合**: シームレスなウォレット接続体験
 - **レスポンシブデザイン**: あらゆるデバイスで最適な表示
 - **リアルタイム情報**: ミント価格と在庫状況をリアルタイムで表示
-- **複数ミント対応**: 1回のトランザクションで複数のNFTをミント可能
+- **複数ミント対応**: 1 回のトランザクションで複数の NFT をミント可能
 
 ## 🛠 技術スタック
 
 - **フロントエンド**: Vite + Vanilla JavaScript
-- **ブロックチェーン**: Ethereum / EVM互換チェーン
+- **ブロックチェーン**: Polygon / EVM 互換チェーン
 - **ウォレット接続**: MetaMask SDK
 - **スマートコントラクト**: ethers.js
-- **デプロイ**: GitHub Pages
+- **デプロイ**: GitHub Pages / REMIX
 
 ## 🚀 クイックスタート
 
 ### 前提条件
 
-- Node.js (v16以上)
+- Node.js (v16 以上)
 - npm または yarn
-- MetaMaskアプリ（モバイル）またはブラウザ拡張機能（デスクトップ）
+- MetaMask アプリ（モバイル）またはブラウザ拡張機能（デスクトップ）
 
 ### ローカル開発
 
@@ -46,12 +46,12 @@ npm run dev
 
 ### 設定
 
-1. `nft-mint-app/src/contract.js`を編集して、NFTコントラクト情報を設定：
+1. `nft-mint-app/src/contract.js`を編集して、NFT コントラクト情報を設定：
 
 ```javascript
-export const NFT_CONTRACT_ADDRESS = 'YOUR_CONTRACT_ADDRESS';
+export const NFT_CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS";
 export const CHAIN_CONFIG = {
-  chainId: '0x1', // 使用するチェーンID
+  chainId: "0x1", // 使用するチェーンID
   // ...
 };
 ```
@@ -79,17 +79,20 @@ bizenDao.github.io/
 ## 🔧 主要な機能
 
 ### ウォレット接続
-- MetaMask SDKを使用した安全な接続
+
+- MetaMask SDK を使用した安全な接続
 - モバイルブラウザからのディープリンク対応
 - 自動的なチェーン切り替え
 
-### NFTミント
-- ERC721標準に準拠
+### NFT ミント
+
+- ERC721 標準に準拠
 - ガス見積もりと最適化
 - トランザクション状態のリアルタイム追跡
 - エラーハンドリングとユーザーフィードバック
 
 ### UI/UX
+
 - モバイル最適化されたタッチフレンドリーなインターフェース
 - ダークモード/ライトモード自動切り替え
 - プログレッシブウェブアプリ（PWA）対応
@@ -121,11 +124,11 @@ git push origin main
 
 ## 📄 ライセンス
 
-このプロジェクトはMITライセンスの下で公開されています。詳細は[LICENSE](LICENSE)ファイルを参照してください。
+このプロジェクトは MIT ライセンスの下で公開されています。詳細は[LICENSE](LICENSE)ファイルを参照してください。
 
 ## 🔗 関連リンク
 
-- [BizenDao公式サイト](https://bizendao.github.io/)
+- [BizenDao 公式サイト](https://bizendao.github.io/)
 - [ドキュメント](docs/)
 - [問題報告](https://github.com/bizenDao/bizenDao.github.io/issues)
 
