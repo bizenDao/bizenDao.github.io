@@ -221,7 +221,7 @@ function render() {
               </div>
               <div class="info-item">
                 <div class="info-label">Minted</div>
-                <div class="info-value">${state.contractInfo.totalSupply}/${state.contractInfo.maxSupply}</div>
+                <div class="info-value">${state.contractInfo.totalSupply}</div>
               </div>
             </div>
 
