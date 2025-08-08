@@ -2,6 +2,7 @@
 import { NFT_CONTRACT_ADDRESS } from './config';
 
 // BizenDao Members SBT ABI
+// Source: contract/MembersSBT/BizenDaoMembersSBT_ABI.json
 export const NFT_CONTRACT_ABI = [
   {
     "inputs": [],
@@ -207,7 +208,7 @@ export const NFT_CONTRACT_ABI = [
       {
         "indexed": false,
         "internalType": "string",
-        "name": "avatarUrl",
+        "name": "avatarImage",
         "type": "string"
       }
     ],

@@ -2,6 +2,8 @@ import './style.css';
 import { walletManager } from './wallet';
 import { nftMinter } from './mint';
 import { CHAIN_CONFIG, getExplorerUrl, getCurrencySymbol, isDevelopment } from './config';
+import { userProfileManager } from './userProfile';
+import { DEFAULT_AVATAR } from './imageUtils';
 
 const app = document.querySelector('#app');
 
@@ -10,7 +12,9 @@ let state = {
   isLoading: false,
   mintQuantity: 1,
   message: null,
-  contractInfo: null
+  contractInfo: null,
+  hasMinted: false,
+  profileElement: null
 };
 
 function setState(updates) {
@@ -51,7 +55,35 @@ async function loadContractInfo() {
   try {
     await nftMinter.initialize();
     const contractInfo = await nftMinter.fetchContractData();
-    setState({ contractInfo });
+    
+    // Check if user has already minted
+    const account = walletManager.getAccount();
+    const hasMinted = await nftMinter.contract.hasMinted(account);
+    
+    // Create profile UI if user has minted
+    let profileElement = null;
+    if (hasMinted && !state.profileElement) {
+      await userProfileManager.initialize();
+      profileElement = userProfileManager.createProfileUI();
+      
+      // Try to load existing profile data
+      try {
+        await userProfileManager.getUserInfo();
+        const info = userProfileManager.currentUserInfo;
+        if (info) {
+          profileElement.querySelector('#memberName').value = info.memberName || '';
+          profileElement.querySelector('#discordId').value = info.discordId || '';
+          if (info.avatarImage && info.avatarImage !== DEFAULT_AVATAR) {
+            profileElement.querySelector('#avatarPreview img').src = info.avatarImage;
+            profileElement.querySelector('#removeButton').style.display = 'inline-block';
+          }
+        }
+      } catch (err) {
+        console.log('No existing profile data');
+      }
+    }
+    
+    setState({ contractInfo, hasMinted, profileElement });
   } catch (error) {
     console.error('Failed to load contract info:', error);
     showMessage('Failed to load NFT contract information', 'error');
@@ -63,7 +95,9 @@ async function disconnectWallet() {
   setState({
     isConnected: false,
     contractInfo: null,
-    message: null
+    message: null,
+    hasMinted: false,
+    profileElement: null
   });
 }
 
@@ -83,9 +117,8 @@ async function mintNFT() {
       : `Membership card minted successfully! Transaction: ${result.transactionHash}`;
     showMessage(successMessage, 'success');
     
-    // Refresh contract data
-    const contractInfo = await nftMinter.fetchContractData();
-    setState({ contractInfo });
+    // Refresh contract data and load profile UI
+    await loadContractInfo();
   } catch (error) {
     console.error('Minting error:', error);
     setState({ isLoading: false });
@@ -138,39 +171,51 @@ function render() {
     </div>
 
     ${state.isConnected ? `
-      <div class="mint-section">
-        ${state.contractInfo ? `
-          <div class="contract-info">
-            <div class="info-item">
-              <div class="info-label">Price</div>
-              <div class="info-value">FREE</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Minted</div>
-              <div class="info-value">${state.contractInfo.totalSupply}/${state.contractInfo.maxSupply}</div>
-            </div>
-          </div>
-
-          <div class="mint-controls">
-            <div class="sbt-info">
-              <p class="sbt-notice">🎫 One membership card per wallet</p>
-              <p class="sbt-notice">💎 Soul Bound Token (Non-transferable)</p>
-              <p class="sbt-notice">🆓 Free mint (gas only)</p>
+      ${!state.hasMinted ? `
+        <div class="mint-section">
+          ${state.contractInfo ? `
+            <div class="contract-info">
+              <div class="info-item">
+                <div class="info-label">Price</div>
+                <div class="info-value">FREE</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Minted</div>
+                <div class="info-value">${state.contractInfo.totalSupply}/${state.contractInfo.maxSupply}</div>
+              </div>
             </div>
 
-            <button onclick="window.app.mintNFT()" ${state.isLoading ? 'disabled' : ''}>
-              ${state.isLoading ? '<span class="loading"></span>Minting...' : 'Mint Membership Card'}
-            </button>
-          </div>
-        ` : `
-          <div class="loading-contract">
-            <span class="loading"></span>
-            <p>Loading contract information...</p>
-          </div>
-        `}
-      </div>
+            <div class="mint-controls">
+              <div class="sbt-info">
+                <p class="sbt-notice">🎫 One membership card per wallet</p>
+                <p class="sbt-notice">💎 Soul Bound Token (Non-transferable)</p>
+                <p class="sbt-notice">🆓 Free mint (gas only)</p>
+              </div>
+
+              <button onclick="window.app.mintNFT()" ${state.isLoading ? 'disabled' : ''}>
+                ${state.isLoading ? '<span class="loading"></span>Minting...' : 'Mint Membership Card'}
+              </button>
+            </div>
+          ` : `
+            <div class="loading-contract">
+              <span class="loading"></span>
+              <p>Loading contract information...</p>
+            </div>
+          `}
+        </div>
+      ` : ''}
+      
+      <div id="profileContainer"></div>
     ` : ''}
   `;
+  
+  // Insert profile element if it exists
+  if (state.profileElement && state.hasMinted) {
+    const container = document.getElementById('profileContainer');
+    if (container) {
+      container.appendChild(state.profileElement);
+    }
+  }
 }
 
 // Make functions available globally for onclick handlers

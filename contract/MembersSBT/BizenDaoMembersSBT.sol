@@ -15,6 +15,9 @@ contract BizenDaoMembersSBT {
     string public constant name = "BizenDao Members Card";
     string public constant symbol = "BIZSBT";
     
+    // Default avatar image (base64 encoded SVG - simple avatar placeholder)
+    string public constant DEFAULT_AVATAR = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTAwIiBjeT0iODAiIHI9IjQwIiBmaWxsPSIjNjY3ZWVhIi8+PHBhdGggZD0iTTEwMCwxMzBjLTQwLDAuNS04MCwyMC04MCw1MHYyMGgxNjB2LTIwQzE4MCwxNTAsMTQwLDEzMC41LDEwMCwxMzB6IiBmaWxsPSIjNjY3ZWVhIi8+PC9zdmc+";
+    
     // Owner of the contract
     address public owner;
     
@@ -171,8 +174,9 @@ contract BizenDaoMembersSBT {
      * @notice Set user information
      * @param memberName The member's display name
      * @param discordId The member's Discord ID
-     * @param avatarImage The member's avatar image (URL or IPFS hash)
+     * @param avatarImage The member's avatar image (base64 encoded image data)
      * @dev Only the token holder can update their own information
+     * @dev If avatarImage is empty, DEFAULT_AVATAR will be used when queried
      */
     function setUserInfo(
         string memory memberName,
@@ -195,7 +199,7 @@ contract BizenDaoMembersSBT {
      * @param user The address to query
      * @return memberName The member's display name
      * @return discordId The member's Discord ID
-     * @return avatarImage The member's avatar image
+     * @return avatarImage The member's avatar image (returns DEFAULT_AVATAR if not set)
      */
     function getUserInfo(address user) external view returns (
         string memory memberName,
@@ -203,6 +207,10 @@ contract BizenDaoMembersSBT {
         string memory avatarImage
     ) {
         UserInfo memory info = _userInfo[user];
+        // Return default avatar if avatarImage is empty
+        if (bytes(info.avatarImage).length == 0) {
+            return (info.memberName, info.discordId, DEFAULT_AVATAR);
+        }
         return (info.memberName, info.discordId, info.avatarImage);
     }
     
