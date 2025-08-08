@@ -10,7 +10,7 @@ BizenDao Members SBTは、BizenDaoのメンバーシップカードとして機�
 - **1アカウント1枚限定**: 各アドレスは1つのSBTのみ保有可能
 - **譲渡不可（Soul Bound）**: トークンの譲渡・売買は不可能
 - **オーナー権限でのBURN**: コントラクトオーナーのみがトークンをBURN可能
-- **ユーザー情報管理**: メンバー名、Discord ID、アバターURLを保存可能
+- **ユーザー情報管理**: メンバー名、Discord ID、アバター画像（URLまたはIPFSハッシュ）を保存可能
 
 ## コントラクト仕様
 
@@ -44,14 +44,14 @@ function hasMinted(address account) external view returns (bool)
 function setUserInfo(
     string memory memberName,
     string memory discordId,
-    string memory avatarUrl
+    string memory avatarImage
 ) external
 
 // ユーザー情報を取得
 function getUserInfo(address user) external view returns (
     string memory memberName,
     string memory discordId,
-    string memory avatarUrl
+    string memory avatarImage
 )
 ```
 
@@ -136,14 +136,14 @@ await contract.burn(tokenId);
 await contract.setUserInfo(
     "Taro Yamada",           // メンバー名
     "taro#1234",             // Discord ID
-    "https://example.com/avatar.png"  // アバターURL
+    "https://example.com/avatar.png"  // アバター画像（URLまたはIPFSハッシュ）
 );
 ```
 
 ### ユーザー情報の取得
 ```javascript
 // 特定のアドレスのユーザー情報を取得
-const [memberName, discordId, avatarUrl] = await contract.getUserInfo(userAddress);
+const [memberName, discordId, avatarImage] = await contract.getUserInfo(userAddress);
 ```
 
 ## セキュリティ考慮事項
@@ -152,6 +152,7 @@ const [memberName, discordId, avatarUrl] = await contract.getUserInfo(userAddres
 2. **BURN機能**: 誤ってBURNしないよう注意が必要です（ユーザー情報も削除されます）
 3. **再ミント不可**: 一度BURNされたアドレスは再度ミントできません
 4. **個人情報**: ユーザー情報はブロックチェーン上に公開されるため、適切な情報のみ設定してください
+5. **アバター画像**: URLやIPFSハッシュを保存できますが、画像自体はオフチェーンに保存されます
 
 ## ライセンス
 

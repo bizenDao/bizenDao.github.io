@@ -34,7 +34,7 @@ contract BizenDaoMembersSBT {
     struct UserInfo {
         string memberName;
         string discordId;
-        string avatarUrl;
+        string avatarImage;
     }
     
     // Mapping from address to user information
@@ -45,7 +45,7 @@ contract BizenDaoMembersSBT {
     event Mint(address indexed to, uint256 indexed tokenId);
     event Burn(uint256 indexed tokenId);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-    event UserInfoUpdated(address indexed user, string memberName, string discordId, string avatarUrl);
+    event UserInfoUpdated(address indexed user, string memberName, string discordId, string avatarImage);
     
     // Modifiers
     modifier onlyOwner() {
@@ -171,23 +171,23 @@ contract BizenDaoMembersSBT {
      * @notice Set user information
      * @param memberName The member's display name
      * @param discordId The member's Discord ID
-     * @param avatarUrl The member's avatar URL
+     * @param avatarImage The member's avatar image (URL or IPFS hash)
      * @dev Only the token holder can update their own information
      */
     function setUserInfo(
         string memory memberName,
         string memory discordId,
-        string memory avatarUrl
+        string memory avatarImage
     ) external {
         require(_hasMinted[msg.sender], "Must hold a token to set user info");
         
         _userInfo[msg.sender] = UserInfo({
             memberName: memberName,
             discordId: discordId,
-            avatarUrl: avatarUrl
+            avatarImage: avatarImage
         });
         
-        emit UserInfoUpdated(msg.sender, memberName, discordId, avatarUrl);
+        emit UserInfoUpdated(msg.sender, memberName, discordId, avatarImage);
     }
     
     /**
@@ -195,15 +195,15 @@ contract BizenDaoMembersSBT {
      * @param user The address to query
      * @return memberName The member's display name
      * @return discordId The member's Discord ID
-     * @return avatarUrl The member's avatar URL
+     * @return avatarImage The member's avatar image
      */
     function getUserInfo(address user) external view returns (
         string memory memberName,
         string memory discordId,
-        string memory avatarUrl
+        string memory avatarImage
     ) {
         UserInfo memory info = _userInfo[user];
-        return (info.memberName, info.discordId, info.avatarUrl);
+        return (info.memberName, info.discordId, info.avatarImage);
     }
     
     /**

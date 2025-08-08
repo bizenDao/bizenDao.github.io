@@ -145,7 +145,7 @@ export const NFT_CONTRACT_ABI = [
       },
       {
         "internalType": "string",
-        "name": "avatarUrl",
+        "name": "avatarImage",
         "type": "string"
       }
     ],
@@ -176,7 +176,7 @@ export const NFT_CONTRACT_ABI = [
       },
       {
         "internalType": "string",
-        "name": "avatarUrl",
+        "name": "avatarImage",
         "type": "string"
       }
     ],
