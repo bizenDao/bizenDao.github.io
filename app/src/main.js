@@ -4,7 +4,7 @@ import { header } from './components/Header';
 import { HomePage } from './pages/Home';
 import { nftPage } from './pages/Nft';
 import { nftDetailPage } from './pages/NftDetail';
-import { MintPage } from './pages/Mint';
+import { mintPage } from './pages/Mint';
 import { ShopPage } from './pages/Shop';
 import { profilePage } from './pages/Profile';
 
@@ -81,7 +81,8 @@ router.addRoute('nft', () => {
 });
 
 router.addRoute('mint', () => {
-  renderPage(MintPage());
+  mintPage.render();
+  mintPage.checkConnection();
   updateNavigation('mint');
 });
 
@@ -116,11 +117,12 @@ router.setOnRouteChange((route) => {
 createAppStructure();
 router.init();
 
-// Make router, profilePage, nftPage, nftDetailPage and header available globally
+// Make router, profilePage, nftPage, nftDetailPage, mintPage and header available globally
 window.router = router;
 window.profilePage = profilePage;
 window.nftPage = nftPage;
 window.nftDetailPage = nftDetailPage;
+window.mintPage = mintPage;
 window.header = header;
 
 // Listen for wallet events

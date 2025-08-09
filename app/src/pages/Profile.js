@@ -53,7 +53,9 @@ export class ProfilePage {
       await nftMinter.initialize();
       const contractInfo = await nftMinter.fetchContractData();
       
-      const hasMinted = await nftMinter.contract.hasMinted(account);
+      // 読み取り専用コントラクトを使用してhasMintedをチェック
+      const contractToUse = nftMinter.readOnlyContract || nftMinter.contract;
+      const hasMinted = await contractToUse.hasMinted(account);
       
       let profileElement = null;
       if (hasMinted && !this.state.profileElement) {

@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { walletManager } from './wallet';
 import { CHAIN_CONFIG } from './config';
-import BizenDaoNFT_ABI from '../../contract/BizenDaoNFT/BizenDaoNFT_ABI.json';
+import BizenDaoNFT_ABI from './BizenDaoNFT_ABI';
 
 // BizenDaoNFTのコントラクトアドレス（NFTページ用）
 const NFT_CONTRACT_ADDRESS = '0x56E37701C56fd5A3d22f7383899fe62A4f31Ae4D';

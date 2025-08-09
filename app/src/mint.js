@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { NFT_CONTRACT_ADDRESS, NFT_CONTRACT_ABI } from './contract';
 import { walletManager } from './wallet';
+import { CHAIN_CONFIG } from './config';
 
 class NFTMinter {
   constructor() {
@@ -8,26 +9,36 @@ class NFTMinter {
     this.mintPrice = null;
     this.totalSupply = null;
     this.maxSupply = null;
+    this.readOnlyContract = null;
   }
 
   async initialize() {
-    if (!walletManager.isConnected()) {
-      throw new Error('Wallet not connected');
-    }
-
-    const signer = walletManager.getSigner();
-    this.contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_CONTRACT_ABI, signer);
+    // 読み取り専用コントラクトを初期化（ウォレット接続不要）
+    const provider = new ethers.JsonRpcProvider(CHAIN_CONFIG.rpcUrls[0]);
+    this.readOnlyContract = new ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_CONTRACT_ABI, provider);
     
-    // Fetch contract data
+    // Fetch contract data（読み取り専用）
     await this.fetchContractData();
+    
+    // ミント時のみウォレット接続を要求
+    if (walletManager.isConnected()) {
+      const signer = walletManager.getSigner();
+      this.contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_CONTRACT_ABI, signer);
+    }
   }
 
   async fetchContractData() {
     try {
+      // 読み取り専用コントラクトを使用
+      const contractToUse = this.readOnlyContract || this.contract;
+      if (!contractToUse) {
+        throw new Error('Contract not initialized');
+      }
+      
       const [mintPrice, totalSupply, maxSupply] = await Promise.all([
-        this.contract.mintPrice(),
-        this.contract.totalSupply(),
-        this.contract.maxSupply()
+        contractToUse.mintPrice(),
+        contractToUse.totalSupply(),
+        contractToUse.maxSupply()
       ]);
 
       this.mintPrice = mintPrice;
@@ -46,8 +57,15 @@ class NFTMinter {
   }
 
   async mint(quantity = 1) {
+    // ミント時にウォレット接続を確認
+    if (!walletManager.isConnected()) {
+      throw new Error('Wallet not connected');
+    }
+    
+    // ウォレット接続後にコントラクトを初期化
     if (!this.contract) {
-      throw new Error('Contract not initialized');
+      const signer = walletManager.getSigner();
+      this.contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_CONTRACT_ABI, signer);
     }
 
     try {
