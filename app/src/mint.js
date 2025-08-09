@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { NFT_CONTRACT_ADDRESS, NFT_CONTRACT_ABI } from './contract';
 import { walletManager } from './wallet';
 import { CHAIN_CONFIG } from './config';
-import { createCachedProvider } from '../../src/cache/cachedProvider';
+import { createCachedProvider } from './cache/cachedProvider';
 
 class NFTMinter {
   constructor() {

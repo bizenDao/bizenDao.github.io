@@ -32,7 +32,8 @@ export class BizenDAOCache {
   }
 
   generateKey(method, params, contractAddress = '') {
-    const chainId = window.CHAIN_CONFIG?.chainId || '21201';
+    // Import CHAIN_CONFIG or use default
+    const chainId = '21201'; // BizenDAO chain ID
     const paramsStr = JSON.stringify(params || {});
     return `${chainId}:${contractAddress}:${method}:${paramsStr}`;
   }

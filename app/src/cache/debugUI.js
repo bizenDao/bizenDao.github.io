@@ -133,7 +133,7 @@ export class CacheDebugUI {
 }
 
 // Initialize debug UI in development mode
-if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
   const debugUI = new CacheDebugUI();
   
   // Wait for DOM to be ready

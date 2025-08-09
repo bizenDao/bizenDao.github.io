@@ -2,8 +2,8 @@ import { ethers } from 'ethers';
 import { walletManager } from './wallet';
 import { CHAIN_CONFIG, CONTRACT_ADDRESSES } from './config';
 import BizenDaoNFT_ABI from './BizenDaoNFT_ABI';
-import { createCachedProvider, createCachedContract } from '../../src/cache/cachedProvider';
-import { bizenCache } from '../../src/cache/bizenDAOCache';
+import { createCachedProvider, createCachedContract } from './cache/cachedProvider';
+import { bizenCache } from './cache/bizenDAOCache';
 
 class NFTContract {
   constructor() {
