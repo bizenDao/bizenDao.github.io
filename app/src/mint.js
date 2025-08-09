@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 import { NFT_CONTRACT_ADDRESS, NFT_CONTRACT_ABI } from './contract';
 import { walletManager } from './wallet';
 import { CHAIN_CONFIG } from './config';
+import { createCachedProvider } from '../../src/cache/cachedProvider';
 
 class NFTMinter {
   constructor() {
@@ -14,7 +15,10 @@ class NFTMinter {
 
   async initialize() {
     // 読み取り専用コントラクトを初期化（ウォレット接続不要）
-    const provider = new ethers.JsonRpcProvider(CHAIN_CONFIG.rpcUrls[0]);
+    const provider = createCachedProvider(CHAIN_CONFIG.rpcUrls[0], {
+      contractAddress: NFT_CONTRACT_ADDRESS,
+      logCacheHits: true
+    });
     this.readOnlyContract = new ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_CONTRACT_ABI, provider);
     
     // Fetch contract data（読み取り専用）
