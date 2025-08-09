@@ -1,11 +1,8 @@
 import { header } from '../components/Header';
 import { walletManager } from '../wallet';
 import { ethers } from 'ethers';
-import { CHAIN_CONFIG } from '../config';
+import { CHAIN_CONFIG, CONTRACT_ADDRESSES } from '../config';
 import BizenDaoNFT_ABI from '../BizenDaoNFT_ABI';
-
-// BizenDaoNFTのコントラクトアドレス
-const NFT_CONTRACT_ADDRESS = '0x56E37701C56fd5A3d22f7383899fe62A4f31Ae4D';
 
 export class MintPage {
   constructor() {
@@ -54,7 +51,7 @@ export class MintPage {
     try {
       const provider = new ethers.BrowserProvider(walletManager.ethereum);
       const contract = new ethers.Contract(
-        NFT_CONTRACT_ADDRESS,
+        CONTRACT_ADDRESSES.BIZENDAO_NFT,
         BizenDaoNFT_ABI,
         provider
       );
@@ -105,7 +102,7 @@ export class MintPage {
       const provider = new ethers.BrowserProvider(walletManager.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
-        NFT_CONTRACT_ADDRESS,
+        CONTRACT_ADDRESSES.BIZENDAO_NFT,
         BizenDaoNFT_ABI,
         signer
       );
@@ -193,7 +190,7 @@ export class MintPage {
               <div class="info-grid">
                 <div class="info-item">
                   <span class="info-label">コントラクト</span>
-                  <span class="info-value">${NFT_CONTRACT_ADDRESS.slice(0, 6)}...${NFT_CONTRACT_ADDRESS.slice(-4)}</span>
+                  <span class="info-value">${CONTRACT_ADDRESSES.BIZENDAO_NFT.slice(0, 6)}...${CONTRACT_ADDRESSES.BIZENDAO_NFT.slice(-4)}</span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">ミント費用</span>

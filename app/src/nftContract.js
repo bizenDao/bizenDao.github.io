@@ -1,10 +1,7 @@
 import { ethers } from 'ethers';
 import { walletManager } from './wallet';
-import { CHAIN_CONFIG } from './config';
+import { CHAIN_CONFIG, CONTRACT_ADDRESSES } from './config';
 import BizenDaoNFT_ABI from './BizenDaoNFT_ABI';
-
-// BizenDaoNFTのコントラクトアドレス（NFTページ用）
-const NFT_CONTRACT_ADDRESS = '0x56E37701C56fd5A3d22f7383899fe62A4f31Ae4D';
 
 class NFTContract {
   constructor() {
@@ -21,13 +18,13 @@ class NFTContract {
       // プライベートチェーンのRPCを使用（本番環境ではCORSエラーなし）
       this.provider = new ethers.JsonRpcProvider(CHAIN_CONFIG.rpcUrls[0]);
       this.contract = new ethers.Contract(
-        NFT_CONTRACT_ADDRESS,
+        CONTRACT_ADDRESSES.BIZENDAO_NFT,
         BizenDaoNFT_ABI,
         this.provider
       );
       
       console.log('Connected to:', CHAIN_CONFIG.chainName);
-      console.log('NFT Contract:', NFT_CONTRACT_ADDRESS);
+      console.log('NFT Contract:', CONTRACT_ADDRESSES.BIZENDAO_NFT);
       
       // コントラクトの存在確認
       try {
@@ -296,7 +293,7 @@ class NFTContract {
         symbol,
         totalSupply: totalSupply.toString(),
         mintFee: ethers.formatEther(mintFee),
-        address: NFT_CONTRACT_ADDRESS
+        address: CONTRACT_ADDRESSES.BIZENDAO_NFT
       };
     } catch (error) {
       console.error('Failed to get contract info:', error);
