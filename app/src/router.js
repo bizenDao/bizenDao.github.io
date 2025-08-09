@@ -25,7 +25,17 @@ class Router {
     if (!route) {
       // 動的ルートのマッチング
       for (const [routePath, handler] of Object.entries(this.routes)) {
-        if (routePath.includes(':')) {
+        // ワイルドカードルート（*）のサポート
+        if (routePath.includes('*')) {
+          const routePrefix = routePath.replace('/*', '');
+          if (hash.startsWith(routePrefix + '/') || hash === routePrefix) {
+            route = handler;
+            params = { path: hash.substring(routePrefix.length + 1) };
+            break;
+          }
+        }
+        // パラメータルート（:）のサポート
+        else if (routePath.includes(':')) {
           const routeParts = routePath.split('/');
           const hashParts = hash.split('/');
           

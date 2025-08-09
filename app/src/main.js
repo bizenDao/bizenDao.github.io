@@ -8,6 +8,7 @@ import { nftDetailPage } from './pages/NftDetail';
 import { mintPage } from './pages/Mint';
 import { ShopPage } from './pages/Shop';
 import { profilePage } from './pages/Profile';
+import { ContentsPage } from './pages/Contents';
 
 const app = document.querySelector('#app');
 
@@ -90,8 +91,8 @@ function renderPage(content) {
 }
 
 // Route handlers
-router.addRoute('home', () => {
-  renderPage(HomePage());
+router.addRoute('home', async () => {
+  renderPage(await HomePage());
   updateNavigation('home');
 });
 
@@ -124,6 +125,13 @@ router.addRoute('nft/:id', (params) => {
   nftDetailPage.render();
   nftDetailPage.loadNFTDetail(tokenId);
   // 詳細ページではナビゲーションを更新しない
+});
+
+// Contentsページのルート（動的パス）
+router.addRoute('contents/*', async (params) => {
+  const path = window.location.hash.slice(1); // #contents/...の部分を取得
+  renderPage(await ContentsPage(path));
+  // Contentsページではナビゲーションを更新しない
 });
 
 // Set up route change listener
