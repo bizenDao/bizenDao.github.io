@@ -3,6 +3,7 @@ import { walletManager } from '../wallet';
 import { ethers } from 'ethers';
 import { CHAIN_CONFIG, CONTRACT_ADDRESSES } from '../config';
 import BizenDaoNFT_ABI from '../BizenDaoNFT_ABI';
+import { AddressDisplay } from '../components/AddressDisplay';
 
 export class MintPage {
   constructor() {
@@ -190,7 +191,7 @@ export class MintPage {
               <div class="info-grid">
                 <div class="info-item">
                   <span class="info-label">コントラクト</span>
-                  <span class="info-value">${CONTRACT_ADDRESSES.BIZENDAO_NFT.slice(0, 6)}...${CONTRACT_ADDRESSES.BIZENDAO_NFT.slice(-4)}</span>
+                  <span class="info-value">${AddressDisplay.render(CONTRACT_ADDRESSES.BIZENDAO_NFT, { showCopyIcon: true })}</span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">ミント費用</span>

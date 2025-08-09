@@ -1,4 +1,5 @@
 import { walletManager } from '../wallet';
+import { AddressDisplay } from './AddressDisplay';
 
 export class Header {
   constructor() {
@@ -80,7 +81,7 @@ export class Header {
             <div class="wallet-dropdown">
               <div class="dropdown-item">
                 <span class="dropdown-label">Connected</span>
-                <span class="dropdown-value">${walletManager.formatAddress(this.account)}</span>
+                <span class="dropdown-value">${AddressDisplay.render(this.account, { showCopyIcon: true })}</span>
               </div>
               <button class="dropdown-button disconnect" onclick="window.header.disconnectWallet()">
                 Disconnect

@@ -1,5 +1,6 @@
 import { header } from '../components/Header';
 import { nftContract } from '../nftContract';
+import { AddressDisplay } from '../components/AddressDisplay';
 
 export class NftPage {
   constructor() {
@@ -163,7 +164,7 @@ export class NftPage {
                       ${nft.owner ? `
                         <div class="detail-item">
                           <span class="detail-label">Owner</span>
-                          <span class="detail-value">${this.formatAddress(nft.owner)}</span>
+                          <span class="detail-value">${AddressDisplay.render(nft.owner, { showCopyIcon: false })}</span>
                         </div>
                       ` : ''}
                     </div>
