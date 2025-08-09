@@ -17,14 +17,47 @@ class Router {
 
   handleRoute() {
     const hash = window.location.hash.slice(1) || 'home';
-    const route = this.routes[hash];
+    
+    // まず完全一致を試す
+    let route = this.routes[hash];
+    let params = {};
+    
+    if (!route) {
+      // 動的ルートのマッチング
+      for (const [routePath, handler] of Object.entries(this.routes)) {
+        if (routePath.includes(':')) {
+          const routeParts = routePath.split('/');
+          const hashParts = hash.split('/');
+          
+          if (routeParts.length === hashParts.length) {
+            let match = true;
+            const extractedParams = {};
+            
+            for (let i = 0; i < routeParts.length; i++) {
+              if (routeParts[i].startsWith(':')) {
+                extractedParams[routeParts[i].slice(1)] = hashParts[i];
+              } else if (routeParts[i] !== hashParts[i]) {
+                match = false;
+                break;
+              }
+            }
+            
+            if (match) {
+              route = handler;
+              params = extractedParams;
+              break;
+            }
+          }
+        }
+      }
+    }
     
     if (route) {
       this.currentRoute = hash;
       if (this.onRouteChange) {
         this.onRouteChange(hash);
       }
-      route();
+      route(params);
     } else {
       // Default to home
       this.navigate('home');

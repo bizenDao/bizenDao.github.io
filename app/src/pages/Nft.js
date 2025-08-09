@@ -1,58 +1,203 @@
 import { header } from '../components/Header';
+import { nftContract } from '../nftContract';
 
-export function NftPage() {
-  const { isConnected } = header.getConnectionStatus();
-  
-  return `
-    <div class="page nft-page">
-      <div class="page-header">
-        <h1>NFT Collections</h1>
-        <p class="page-subtitle">Explore and mint exclusive BizenDao NFTs</p>
-      </div>
+export class NftPage {
+  constructor() {
+    this.state = {
+      isLoading: true,
+      nfts: [],
+      userNfts: [],
+      filter: 'all', // 'all', 'mine'
+      contractInfo: null,
+      error: null
+    };
+  }
+
+  setState(updates) {
+    this.state = { ...this.state, ...updates };
+    this.render();
+  }
+
+  async loadNFTs() {
+    try {
+      this.setState({ isLoading: true, error: null });
+
+      const { isConnected, account } = header.getConnectionStatus();
       
-      <div class="nft-collections">
-        <div class="collection-card">
-          <div class="collection-image">
-            <img src="/assets/logo.jpg" alt="Members Card" style="width: 100%; border-radius: 8px;">
-          </div>
-          <h3>BizenDao Members Card</h3>
-          <p class="collection-description">Soul Bound Token for DAO members</p>
-          <div class="collection-stats">
-            <div class="stat">
-              <span class="stat-label">Price</span>
-              <span class="stat-value">FREE</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Type</span>
-              <span class="stat-value">SBT</span>
-            </div>
-          </div>
-          <button onclick="window.router.navigate('profile')" class="collection-button">
-            ${isConnected ? 'Mint Now' : 'Connect Wallet'}
-          </button>
+      // Initialize contract
+      const initialized = await nftContract.initialize();
+      
+      if (!initialized && !isConnected) {
+        // ローカル環境でのCORSエラーの場合
+        this.setState({
+          isLoading: false,
+          error: 'ウォレットを接続してNFTを表示してください（ローカル環境ではCORSエラーが発生します）',
+          nfts: [],
+          userNfts: [],
+          contractInfo: null
+        });
+        return;
+      }
+      
+      // Load contract info
+      const contractInfo = await nftContract.getContractInfo();
+      
+      // Load all NFTs
+      const allNfts = await nftContract.fetchAllNFTs(20);
+      
+      // Load user's NFTs if connected
+      let userNfts = [];
+      if (isConnected && account) {
+        userNfts = await nftContract.fetchUserNFTs(account);
+      }
+      
+      this.setState({
+        isLoading: false,
+        nfts: allNfts,
+        userNfts,
+        contractInfo
+      });
+    } catch (error) {
+      console.error('Failed to load NFTs:', error);
+      this.setState({
+        isLoading: false,
+        error: 'Failed to load NFT data. Please check your connection.'
+      });
+    }
+  }
+
+  setFilter(filter) {
+    this.setState({ filter });
+  }
+
+  getFilteredNFTs() {
+    if (this.state.filter === 'mine') {
+      return this.state.userNfts;
+    }
+    return this.state.nfts;
+  }
+
+  formatAddress(address) {
+    if (!address) return '';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  }
+
+  render() {
+    const pageContent = document.getElementById('page-content');
+    if (!pageContent) return;
+
+    const { isConnected } = header.getConnectionStatus();
+    const filteredNFTs = this.getFilteredNFTs();
+
+    pageContent.innerHTML = `
+      <div class="page nft-page">
+        <div class="page-header">
+          <h1>NFT Gallery</h1>
+          <p class="page-subtitle">Explore BizenDao NFT collections</p>
         </div>
-        
-        <div class="collection-card upcoming">
-          <div class="collection-image placeholder">
-            <div class="coming-soon">Coming Soon</div>
-          </div>
-          <h3>BizenDao Genesis</h3>
-          <p class="collection-description">Limited edition founding member NFTs</p>
-          <div class="collection-stats">
-            <div class="stat">
-              <span class="stat-label">Price</span>
-              <span class="stat-value">TBA</span>
+
+        ${this.state.contractInfo ? `
+          <div class="nft-contract-info">
+            <div class="contract-stats">
+              <div class="stat-item">
+                <span class="stat-label">Total Supply</span>
+                <span class="stat-value">${this.state.contractInfo.totalSupply}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Collection</span>
+                <span class="stat-value">${this.state.contractInfo.name}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Symbol</span>
+                <span class="stat-value">${this.state.contractInfo.symbol}</span>
+              </div>
             </div>
-            <div class="stat">
-              <span class="stat-label">Supply</span>
-              <span class="stat-value">1000</span>
-            </div>
           </div>
-          <button class="collection-button" disabled>
-            Coming Soon
+        ` : ''}
+
+        <div class="nft-filters">
+          <button 
+            class="filter-tab ${this.state.filter === 'all' ? 'active' : ''}"
+            onclick="window.nftPage.setFilter('all')"
+          >
+            All NFTs
+          </button>
+          ${isConnected ? `
+            <button 
+              class="filter-tab ${this.state.filter === 'mine' ? 'active' : ''}"
+              onclick="window.nftPage.setFilter('mine')"
+            >
+              My NFTs (${this.state.userNfts.length})
+            </button>
+          ` : ''}
+        </div>
+
+        ${this.state.error ? `
+          <div class="message error">
+            ${this.state.error}
+          </div>
+        ` : ''}
+
+        ${this.state.isLoading ? `
+          <div class="loading-container">
+            <span class="loading"></span>
+            <p>Loading NFTs...</p>
+          </div>
+        ` : `
+          ${filteredNFTs.length > 0 ? `
+            <div class="nft-grid">
+              ${filteredNFTs.map(nft => `
+                <div class="nft-card" onclick="window.router.navigate('nft/${nft.tokenId}')" style="cursor: pointer;">
+                  <div class="nft-image">
+                    <img src="${nft.image}" alt="${nft.name}" onerror="this.src='./assets/logo.jpg'">
+                    ${nft.isLocked ? '<span class="nft-badge locked">SBT</span>' : ''}
+                  </div>
+                  <div class="nft-info">
+                    <h3>${nft.name}</h3>
+                    ${nft.description ? `<p class="nft-description">${nft.description}</p>` : ''}
+                    <div class="nft-details">
+                      <div class="detail-item">
+                        <span class="detail-label">Token ID</span>
+                        <span class="detail-value">#${nft.tokenId}</span>
+                      </div>
+                      ${nft.owner ? `
+                        <div class="detail-item">
+                          <span class="detail-label">Owner</span>
+                          <span class="detail-value">${this.formatAddress(nft.owner)}</span>
+                        </div>
+                      ` : ''}
+                    </div>
+                    <button class="view-detail-button" onclick="event.stopPropagation(); window.router.navigate('nft/${nft.tokenId}')">
+                      詳細を見る
+                    </button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          ` : `
+            <div class="empty-state">
+              ${this.state.filter === 'mine' ? `
+                <p>You don't have any NFTs yet.</p>
+                <button onclick="window.router.navigate('profile')" class="cta-button">
+                  Mint Your First NFT
+                </button>
+              ` : `
+                <p>No NFTs found.</p>
+              `}
+            </div>
+          `}
+        `}
+
+        <div class="mint-cta">
+          <h2>Want to join BizenDao?</h2>
+          <p>Mint your membership NFT to become part of our community</p>
+          <button onclick="window.router.navigate('profile')" class="cta-button">
+            ${isConnected ? 'Mint Membership NFT' : 'Connect Wallet to Mint'}
           </button>
         </div>
       </div>
-    </div>
-  `;
+    `;
+  }
 }
+
+export const nftPage = new NftPage();

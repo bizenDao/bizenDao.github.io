@@ -2,7 +2,8 @@ import './style.css';
 import { router } from './router';
 import { header } from './components/Header';
 import { HomePage } from './pages/Home';
-import { NftPage } from './pages/Nft';
+import { nftPage } from './pages/Nft';
+import { nftDetailPage } from './pages/NftDetail';
 import { MintPage } from './pages/Mint';
 import { ShopPage } from './pages/Shop';
 import { profilePage } from './pages/Profile';
@@ -74,7 +75,8 @@ router.addRoute('home', () => {
 });
 
 router.addRoute('nft', () => {
-  renderPage(NftPage());
+  nftPage.render();
+  nftPage.loadNFTs();
   updateNavigation('nft');
 });
 
@@ -94,6 +96,14 @@ router.addRoute('profile', () => {
   updateNavigation('profile');
 });
 
+// NFT詳細ページのルート（パラメータ付き）
+router.addRoute('nft/:id', (params) => {
+  const tokenId = params.id;
+  nftDetailPage.render();
+  nftDetailPage.loadNFTDetail(tokenId);
+  // 詳細ページではナビゲーションを更新しない
+});
+
 // Set up route change listener
 router.setOnRouteChange((route) => {
   // Clean up profile page if navigating away
@@ -106,9 +116,11 @@ router.setOnRouteChange((route) => {
 createAppStructure();
 router.init();
 
-// Make router, profilePage and header available globally
+// Make router, profilePage, nftPage, nftDetailPage and header available globally
 window.router = router;
 window.profilePage = profilePage;
+window.nftPage = nftPage;
+window.nftDetailPage = nftDetailPage;
 window.header = header;
 
 // Listen for wallet events
@@ -117,6 +129,10 @@ window.addEventListener('walletConnected', (e) => {
   // Profile pageを更新
   if (router.getCurrentRoute() === 'profile' && profilePage) {
     profilePage.checkConnection();
+  }
+  // NFT pageを更新
+  if (router.getCurrentRoute() === 'nft' && nftPage) {
+    nftPage.loadNFTs();
   }
 });
 
@@ -129,6 +145,13 @@ window.addEventListener('walletDisconnected', () => {
       contractInfo: null,
       hasMinted: false,
       profileElement: null
+    });
+  }
+  // NFT pageを更新
+  if (router.getCurrentRoute() === 'nft' && nftPage) {
+    nftPage.setState({
+      userNfts: [],
+      filter: 'all'
     });
   }
 });

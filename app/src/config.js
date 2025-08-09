@@ -9,7 +9,7 @@ const DEVELOPMENT_CHAIN = {
     symbol: 'DEV',
     decimals: 18
   },
-  rpcUrls: ['http://dev2.bon-soleil.com/rpc'],
+  rpcUrls: ['https://dev2.bon-soleil.com/rpc'],
   blockExplorerUrls: [] // No block explorer for private chain
 };
 
