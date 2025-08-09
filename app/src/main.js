@@ -1,5 +1,6 @@
 import './style.css';
 import { router } from './router';
+import { header } from './components/Header';
 import { HomePage } from './pages/Home';
 import { NftPage } from './pages/Nft';
 import { MintPage } from './pages/Mint';
@@ -21,6 +22,7 @@ const navItems = [
 function createAppStructure() {
   app.innerHTML = `
     <div class="app-container">
+      <header id="app-header" class="app-header"></header>
       <div id="page-content" class="page-content"></div>
       <nav class="bottom-nav">
         ${navItems.map(item => `
@@ -32,6 +34,10 @@ function createAppStructure() {
       </nav>
     </div>
   `;
+  
+  // Initialize header
+  header.render();
+  header.checkConnection();
   
   // Add click handlers to navigation items
   document.querySelectorAll('.nav-item').forEach(item => {
@@ -100,6 +106,29 @@ router.setOnRouteChange((route) => {
 createAppStructure();
 router.init();
 
-// Make router and profilePage available globally
+// Make router, profilePage and header available globally
 window.router = router;
 window.profilePage = profilePage;
+window.header = header;
+
+// Listen for wallet events
+window.addEventListener('walletConnected', (e) => {
+  console.log('Wallet connected:', e.detail.account);
+  // Profile pageを更新
+  if (router.getCurrentRoute() === 'profile' && profilePage) {
+    profilePage.checkConnection();
+  }
+});
+
+window.addEventListener('walletDisconnected', () => {
+  console.log('Wallet disconnected');
+  // Profile pageを更新
+  if (router.getCurrentRoute() === 'profile' && profilePage) {
+    profilePage.setState({
+      isConnected: false,
+      contractInfo: null,
+      hasMinted: false,
+      profileElement: null
+    });
+  }
+});

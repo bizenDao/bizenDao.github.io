@@ -1,7 +1,7 @@
-import { walletManager } from '../wallet';
+import { header } from '../components/Header';
 
 export function NftPage() {
-  const isConnected = walletManager.isConnected();
+  const { isConnected } = header.getConnectionStatus();
   
   return `
     <div class="page nft-page">

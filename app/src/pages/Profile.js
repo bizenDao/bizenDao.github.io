@@ -1,4 +1,4 @@
-import { walletManager } from '../wallet';
+import { header } from '../components/Header';
 import { nftMinter } from '../mint';
 import { CHAIN_CONFIG, getExplorerUrl, getCurrencySymbol, isDevelopment, FORCE_PRIVATE_CHAIN } from '../config';
 import { userProfileManager } from '../userProfile';
@@ -35,34 +35,24 @@ export class ProfilePage {
     }
   }
 
-  async connectWallet() {
-    this.setState({ isLoading: true, message: null });
+  async updateConnectionStatus() {
+    const { isConnected, account } = header.getConnectionStatus();
     
-    try {
-      const account = await walletManager.connect();
-      
-      this.setState({
-        isConnected: true,
-        isLoading: false
-      });
-      
-      this.showMessage('Wallet connected successfully!', 'success');
-      
-      // Load contract info
+    this.setState({ isConnected });
+    
+    if (isConnected) {
       await this.loadContractInfo();
-    } catch (error) {
-      console.error('Connection error:', error);
-      this.setState({ isLoading: false });
-      this.showMessage(error.message || 'Failed to connect wallet', 'error');
     }
   }
 
   async loadContractInfo() {
     try {
+      const { account } = header.getConnectionStatus();
+      if (!account) return;
+      
       await nftMinter.initialize();
       const contractInfo = await nftMinter.fetchContractData();
       
-      const account = walletManager.getAccount();
       const hasMinted = await nftMinter.contract.hasMinted(account);
       
       let profileElement = null;
@@ -93,16 +83,6 @@ export class ProfilePage {
     }
   }
 
-  async disconnectWallet() {
-    walletManager.disconnect();
-    this.setState({
-      isConnected: false,
-      contractInfo: null,
-      message: null,
-      hasMinted: false,
-      profileElement: null
-    });
-  }
 
   async mintNFT() {
     if (!this.state.mintFormData.memberName.trim()) {
@@ -224,20 +204,13 @@ export class ProfilePage {
   }
 
   async checkConnection() {
-    if (typeof window.ethereum !== 'undefined') {
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-      if (accounts.length > 0) {
-        await this.connectWallet();
-      }
-    }
+    await this.updateConnectionStatus();
   }
 
   render() {
     const pageContent = document.getElementById('page-content');
     if (!pageContent) return;
 
-    const isMobile = walletManager.isMobileDevice();
-    const isInMetaMaskApp = walletManager.isInMetaMaskApp();
 
     pageContent.innerHTML = `
       <div class="page profile-page">
@@ -252,33 +225,11 @@ export class ProfilePage {
           </div>
         ` : ''}
 
-        ${isMobile && !isInMetaMaskApp && !this.state.isConnected ? `
-          <div class="mobile-notice">
-            <h3>📱 モバイルでのアクセス方法</h3>
-            <ol>
-              <li>MetaMaskアプリをインストール</li>
-              <li>MetaMaskアプリを開く</li>
-              <li>下部のブラウザタブをタップ</li>
-              <li>このサイトのURLを入力してアクセス</li>
-            </ol>
-            <p class="mobile-tip">💡 MetaMaskアプリ内ブラウザからアクセスすると、スムーズに接続できます</p>
+        ${!this.state.isConnected ? `
+          <div class="wallet-notice">
+            <p>Please connect your wallet using the button in the header to access your profile.</p>
           </div>
         ` : ''}
-
-        <div class="wallet-section">
-          ${this.state.isConnected ? `
-            <div class="wallet-info">
-              <span class="wallet-address">${walletManager.formatAddress(walletManager.getAccount())}</span>
-            </div>
-            <button class="secondary" onclick="window.profilePage.disconnectWallet()" ${this.state.isLoading ? 'disabled' : ''}>
-              Disconnect
-            </button>
-          ` : `
-            <button onclick="window.profilePage.connectWallet()" ${this.state.isLoading ? 'disabled' : ''}>
-              ${this.state.isLoading ? '<span class="loading"></span>Connecting...' : 'Connect Wallet'}
-            </button>
-          `}
-        </div>
 
         ${this.state.isConnected ? `
           ${!this.state.hasMinted ? `
