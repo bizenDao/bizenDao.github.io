@@ -1,6 +1,8 @@
 import { header } from '../components/Header';
 import { nftContract } from '../nftContract';
-import { getExplorerUrl } from '../config';
+import { getExplorerUrl, CONTRACT_ADDRESSES, CHAIN_CONFIG } from '../config';
+import { tbaManager } from '../tbaManager';
+import { walletManager } from '../wallet';
 
 export class NftDetailPage {
   constructor() {
@@ -8,7 +10,13 @@ export class NftDetailPage {
       isLoading: true,
       nft: null,
       error: null,
-      tokenId: null
+      tokenId: null,
+      tbaAddress: null,
+      tbaExists: false,
+      tbaLoading: false,
+      tbaNFTs: [],
+      isOwner: false,
+      tbaAvailable: true
     };
   }
 
@@ -88,7 +96,14 @@ export class NftDetailPage {
         attributes: metadata.attributes || []
       };
 
-      this.setState({ isLoading: false, nft });
+      // Check if current user is the owner
+      const { account } = header.getConnectionStatus();
+      const isOwner = account && owner.toLowerCase() === account.toLowerCase();
+
+      this.setState({ isLoading: false, nft, isOwner });
+
+      // Load TBA information
+      await this.loadTBAInfo(tokenId);
     } catch (error) {
       console.error('Failed to load NFT details:', error);
       this.setState({
@@ -101,6 +116,98 @@ export class NftDetailPage {
   formatAddress(address) {
     if (!address) return '';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  }
+
+  async loadTBAInfo(tokenId) {
+    try {
+      const initialized = await tbaManager.initialize();
+      
+      // If TBA Manager failed to initialize, show TBA as not available
+      if (!initialized) {
+        console.log('TBA functionality not available');
+        this.setState({ 
+          tbaAddress: null, 
+          tbaExists: false,
+          tbaAvailable: false 
+        });
+        return;
+      }
+      
+      // Get TBA address
+      const tbaAddress = await tbaManager.getTBAAddress(CONTRACT_ADDRESSES.BIZENDAO_NFT, tokenId);
+      const tbaExists = await tbaManager.isTBACreated(CONTRACT_ADDRESSES.BIZENDAO_NFT, tokenId);
+      
+      this.setState({ 
+        tbaAddress, 
+        tbaExists,
+        tbaAvailable: true 
+      });
+      
+      // If TBA exists, load NFTs inside it
+      if (tbaExists) {
+        await this.loadTBANFTs();
+      }
+    } catch (error) {
+      console.error('Failed to load TBA info:', error);
+      this.setState({ 
+        tbaAddress: null, 
+        tbaExists: false,
+        tbaAvailable: false 
+      });
+    }
+  }
+
+  async loadTBANFTs() {
+    if (!this.state.tbaAddress) return;
+    
+    try {
+      this.setState({ tbaLoading: true });
+      const nfts = await tbaManager.getTBANFTs(this.state.tbaAddress);
+      this.setState({ tbaNFTs: nfts, tbaLoading: false });
+    } catch (error) {
+      console.error('Failed to load TBA NFTs:', error);
+      this.setState({ tbaLoading: false });
+    }
+  }
+
+  async createTBA() {
+    if (!this.state.isOwner || !walletManager.isConnected()) {
+      alert('NFTのオーナーのみがTBAを作成できます');
+      return;
+    }
+
+    try {
+      this.setState({ tbaLoading: true });
+      
+      // Debug: Check the current chain ID
+      const provider = walletManager.ethereum;
+      const chainId = await provider.request({ method: 'eth_chainId' });
+      console.log('Current chain ID:', chainId, 'Expected:', CHAIN_CONFIG.chainId);
+      
+      if (chainId !== CHAIN_CONFIG.chainId) {
+        alert(`Wrong network! Please switch to ${CHAIN_CONFIG.chainName}`);
+        this.setState({ tbaLoading: false });
+        return;
+      }
+      
+      const tbaAddress = await tbaManager.createTBA(
+        CONTRACT_ADDRESSES.BIZENDAO_NFT,
+        parseInt(this.state.tokenId) // Ensure tokenId is a number
+      );
+      
+      this.setState({ 
+        tbaAddress, 
+        tbaExists: true,
+        tbaLoading: false 
+      });
+      
+      // Reload TBA NFTs
+      await this.loadTBANFTs();
+    } catch (error) {
+      console.error('Failed to create TBA:', error);
+      alert('TBAの作成に失敗しました: ' + error.message);
+      this.setState({ tbaLoading: false });
+    }
   }
 
   render() {
@@ -203,6 +310,68 @@ export class NftDetailPage {
                       }
                     </p>
                   </div>
+                </div>
+
+                <div class="nft-detail-section tba-section">
+                  <h3>Token Bound Account (TBA)</h3>
+                  ${!this.state.tbaAvailable ? `
+                    <div class="tba-unavailable">
+                      <p class="info-text">TBA機能は現在利用できません（コントラクトがデプロイされていません）</p>
+                    </div>
+                  ` : this.state.tbaExists ? `
+                    <div class="tba-info">
+                      <div class="detail-row">
+                        <span class="detail-label">TBAアドレス</span>
+                        <span class="detail-value">
+                          ${getExplorerUrl(this.state.tbaAddress, 'address') ? 
+                            `<a href="${getExplorerUrl(this.state.tbaAddress, 'address')}" target="_blank" class="address-link">
+                              ${this.formatAddress(this.state.tbaAddress)}
+                            </a>` : 
+                            this.formatAddress(this.state.tbaAddress)
+                          }
+                        </span>
+                      </div>
+                      
+                      <div class="tba-nfts">
+                        <h4>TBA内のNFT (${this.state.tbaNFTs.length}個)</h4>
+                        ${this.state.tbaLoading ? `
+                          <div class="loading-container">
+                            <span class="loading"></span>
+                          </div>
+                        ` : this.state.tbaNFTs.length > 0 ? `
+                          <div class="tba-nft-grid">
+                            ${this.state.tbaNFTs.map(nft => `
+                              <div class="tba-nft-card" onclick="window.router.navigate('nft/${nft.tokenId}')" style="cursor: pointer;">
+                                <img src="${nft.image}" alt="${nft.name}" onerror="this.src='./assets/logo.jpg'">
+                                <h5>${nft.name}</h5>
+                                <p class="tba-nft-id">#${nft.tokenId}</p>
+                                ${nft.isLocked ? '<span class="nft-badge locked">SBT</span>' : ''}
+                              </div>
+                            `).join('')}
+                          </div>
+                        ` : `
+                          <p class="no-nfts">TBA内にNFTがありません</p>
+                        `}
+                      </div>
+                    </div>
+                  ` : `
+                    <div class="tba-create">
+                      <p>このNFTのTBAはまだ作成されていません</p>
+                      ${this.state.isOwner && isConnected ? `
+                        <button 
+                          onclick="window.nftDetailPage.createTBA()" 
+                          class="create-tba-button"
+                          ${this.state.tbaLoading ? 'disabled' : ''}
+                        >
+                          ${this.state.tbaLoading ? '<span class="loading"></span>作成中...' : 'TBAを作成'}
+                        </button>
+                      ` : this.state.isOwner && !isConnected ? `
+                        <p class="info-text">TBAを作成するにはウォレットを接続してください</p>
+                      ` : `
+                        <p class="info-text">NFTのオーナーのみがTBAを作成できます</p>
+                      `}
+                    </div>
+                  `}
                 </div>
               </div>
             </div>
