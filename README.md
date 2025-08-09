@@ -35,7 +35,7 @@
 ```bash
 # リポジトリのクローン
 git clone https://github.com/bizenDao/bizenDao.github.io.git
-cd bizenDao.github.io/nft-mint-app
+cd bizenDao.github.io/app
 
 # 依存関係のインストール
 npm install
@@ -46,7 +46,7 @@ npm run dev
 
 ### 設定
 
-1. `nft-mint-app/src/contract.js`を編集して、NFT コントラクト情報を設定：
+1. `app/src/contract.js`を編集して、NFT コントラクト情報を設定：
 
 ```javascript
 export const NFT_CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS";
@@ -66,7 +66,7 @@ bizenDao.github.io/
 ├── docs/               # ドキュメント
 │   ├── DEPLOYMENT.md   # デプロイ手順
 │   └── NFT_MINT_APP.md # アプリ詳細
-└── nft-mint-app/       # ソースコード
+└── app/       # ソースコード
     ├── src/
     │   ├── contract.js # コントラクト設定
     │   ├── wallet.js   # ウォレット接続
@@ -104,11 +104,11 @@ bizenDao.github.io/
 ### クイックデプロイ
 
 ```bash
-# nft-mint-appディレクトリで実行
+# appディレクトリで実行
 npm run build
 
 # リポジトリルートで実行
-cp -r nft-mint-app/dist/* .
+cp -r app/dist/* .
 git add -A
 git commit -m "Deploy updates"
 git push origin main

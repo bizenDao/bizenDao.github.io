@@ -2,12 +2,12 @@
 
 ## 概要
 
-本プロジェクトでは、開発環境としてプライベートチェーンを使用し、本番環境ではPolygon Mainnetを使用します。
+本プロジェクトでは、開発環境としてプライベートチェーンを使用し、本番環境では Polygon Mainnet を使用します。
 
 ## プライベートチェーン情報
 
 - **RPC URL**: `http://dev2.bon-soleil.com/rpc`
-- **チェーンID**: `21201` (0x52d1)
+- **チェーン ID**: `21201` (0x52d1)
 - **通貨シンボル**: `DEV`
 - **ブロックエクスプローラー**: なし（プライベートチェーン）
 
@@ -15,10 +15,10 @@
 
 ### 1. 環境変数の設定
 
-`nft-mint-app`ディレクトリに`.env`ファイルを作成：
+`app`ディレクトリに`.env`ファイルを作成：
 
 ```bash
-cd nft-mint-app
+cd app
 cp .env.example .env
 ```
 
@@ -35,13 +35,13 @@ VITE_CONTRACT_ADDRESS=0x166748e744195650a94FC32C64d8f0c9329f96F1 # REMIXでデ�
 VITE_INFURA_API_KEY=
 ```
 
-### 2. MetaMaskの設定
+### 2. MetaMask の設定
 
-1. MetaMaskを開く
+1. MetaMask を開く
 2. ネットワークを追加：
    - ネットワーク名: `BizenDao Dev Chain`
    - RPC URL: `http://dev2.bon-soleil.com/rpc`
-   - チェーンID: `21201`
+   - チェーン ID: `21201`
    - 通貨記号: `DEV`
 
 ### 3. 開発サーバーの起動
@@ -84,9 +84,9 @@ VITE_ENV=production
 npm run build
 ```
 
-#### FORCE_PRIVATE_CHAINフラグについて
+#### FORCE_PRIVATE_CHAIN フラグについて
 
-`nft-mint-app/src/config.js`に`FORCE_PRIVATE_CHAIN`フラグが設定されています：
+`app/src/config.js`に`FORCE_PRIVATE_CHAIN`フラグが設定されています：
 
 ```javascript
 // Force private chain flag (set to true during development phase)
@@ -94,14 +94,14 @@ npm run build
 export const FORCE_PRIVATE_CHAIN = true;
 ```
 
-このフラグが`true`の間は、本番ビルドでもプライベートチェーンが使用されます。Polygon Mainnetへのデプロイ準備が整ったら、このフラグを`false`に変更してください。
+このフラグが`true`の間は、本番ビルドでもプライベートチェーンが使用されます。Polygon Mainnet へのデプロイ準備が整ったら、このフラグを`false`に変更してください。
 
 ## コントラクトのデプロイ
 
 ### 1. プライベートチェーンへのデプロイ
 
 1. [REMIX IDE](https://remix.ethereum.org)にアクセス
-2. MetaMaskでプライベートチェーンに接続
+2. MetaMask でプライベートチェーンに接続
 3. コントラクトをデプロイ
 4. デプロイしたアドレスを`.env`の`VITE_CONTRACT_ADDRESS`に設定
 
@@ -111,11 +111,11 @@ export const FORCE_PRIVATE_CHAIN = true;
 
 ## トラブルシューティング
 
-### MetaMaskで接続できない
+### MetaMask で接続できない
 
 1. ネットワーク設定を確認
-2. RPC URLが正しいか確認: `http://dev2.bon-soleil.com/rpc`
-3. HTTPSではなくHTTPであることに注意
+2. RPC URL が正しいか確認: `http://dev2.bon-soleil.com/rpc`
+3. HTTPS ではなく HTTP であることに注意
 
 ### 環境変数が反映されない
 
@@ -133,10 +133,10 @@ export const FORCE_PRIVATE_CHAIN = true;
 
 1. **環境分離**: 開発と本番で異なるコントラクトアドレスを使用
 2. **テスト**: プライベートチェーンで十分にテストしてから本番にデプロイ
-3. **バージョン管理**: `.env`ファイルはGitにコミットしない（`.gitignore`に含まれています）
+3. **バージョン管理**: `.env`ファイルは Git にコミットしない（`.gitignore`に含まれています）
 
 ## 参考リンク
 
-- [プロジェクトREADME](../README.md)
+- [プロジェクト README](../README.md)
 - [スマートコントラクトデプロイガイド](./SMART_CONTRACT_DEPLOYMENT.md)
 - [アプリケーションデプロイガイド](./DEPLOYMENT.md)
