@@ -6,148 +6,301 @@ import { DEFAULT_AVATAR, processImageToBase64, validateImageFile, getBase64SizeK
 
 export class ProfilePage {
   constructor() {
-    this.state = {
-      isConnected: false,
-      isLoading: false,
-      mintQuantity: 1,
-      message: null,
-      contractInfo: null,
-      hasMinted: false,
-      profileElement: null,
-      mintFormData: {
-        memberName: '',
-        discordId: '',
-        avatarImage: null,
-        avatarPreview: null
-      }
-    };
+    this.isLoading = false;
   }
 
-  setState(updates) {
-    this.state = { ...this.state, ...updates };
-    this.render();
-  }
+  async render() {
+    const pageContent = document.getElementById('page-content');
+    if (!pageContent) return;
 
-  showMessage(text, type = 'info') {
-    this.setState({ message: { text, type } });
-    if (type !== 'error') {
-      setTimeout(() => this.setState({ message: null }), 5000);
-    }
-  }
-
-  async updateConnectionStatus() {
+    // ウォレット接続状態を確認
     const { isConnected, account } = header.getConnectionStatus();
     
-    this.setState({ isConnected });
-    
-    if (isConnected) {
-      await this.loadContractInfo();
-    }
-  }
+    // 基本HTMLをレンダリング
+    let html = `
+      <div class="page profile-page">
+        <div class="page-header">
+          <h1>Member Profile</h1>
+          <p class="page-subtitle">Manage your BizenDao membership</p>
+        </div>
+    `;
 
-  async loadContractInfo() {
+    if (!isConnected) {
+      html += `
+        <div class="wallet-notice">
+          <p>Please connect your wallet using the button in the header to access your profile.</p>
+        </div>
+      </div>
+      `;
+      pageContent.innerHTML = html;
+      return;
+    }
+
+    // コントラクト情報を取得
     try {
-      const { account } = header.getConnectionStatus();
-      if (!account) return;
-      
       await nftMinter.initialize();
       const contractInfo = await nftMinter.fetchContractData();
-      
-      // 読み取り専用コントラクトを使用してhasMintedをチェック
       const contractToUse = nftMinter.readOnlyContract || nftMinter.contract;
       const hasMinted = await contractToUse.hasMinted(account);
-      
-      let profileElement = null;
-      if (hasMinted && !this.state.profileElement) {
-        await userProfileManager.initialize();
-        profileElement = userProfileManager.createProfileUI();
-        
-        try {
-          await userProfileManager.getUserInfo();
-          const info = userProfileManager.currentUserInfo;
-          if (info) {
-            profileElement.querySelector('#memberName').value = info.memberName || '';
-            profileElement.querySelector('#discordId').value = info.discordId || '';
-            if (info.avatarImage && info.avatarImage !== DEFAULT_AVATAR) {
-              profileElement.querySelector('#avatarPreview img').src = info.avatarImage;
-              profileElement.querySelector('#removeButton').style.display = 'inline-block';
-            }
-          }
-        } catch (err) {
-          console.log('No existing profile data');
-        }
+
+      if (hasMinted) {
+        // NFTを既に持っている場合、プロフィール編集フォームを表示
+        html += await this.renderProfileForm();
+      } else {
+        // NFTを持っていない場合、ミントフォームを表示
+        html += this.renderMintForm(contractInfo);
       }
-      
-      this.setState({ contractInfo, hasMinted, profileElement });
     } catch (error) {
-      console.error('Failed to load contract info:', error);
-      this.showMessage('Failed to load NFT contract information', 'error');
+      console.error('Failed to load profile:', error);
+      html += `
+        <div class="message error">
+          Failed to load profile information. Please try again later.
+        </div>
+      `;
+    }
+
+    html += `</div>`;
+    pageContent.innerHTML = html;
+
+    // イベントリスナーを設定
+    this.attachEventListeners();
+  }
+
+  renderMintForm(contractInfo) {
+    return `
+      <div class="mint-section">
+        <div class="contract-info">
+          <div class="info-item">
+            <div class="info-label">Price</div>
+            <div class="info-value">FREE</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Minted</div>
+            <div class="info-value">${contractInfo.totalSupply}</div>
+          </div>
+        </div>
+
+        <div class="mint-controls">
+          <div class="sbt-info">
+            <p class="sbt-notice">🎫 One membership card per wallet</p>
+            <p class="sbt-notice">💎 Soul Bound Token (Non-transferable)</p>
+            <p class="sbt-notice">🆓 Free mint (gas only)</p>
+          </div>
+
+          <div class="mint-form">
+            <h3>Member Information</h3>
+            
+            <div class="form-group">
+              <label for="mintMemberName">Member Name *</label>
+              <input 
+                type="text" 
+                id="mintMemberName" 
+                placeholder="Enter your name" 
+                maxlength="50"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label for="mintDiscordId">Discord ID (Optional)</label>
+              <input 
+                type="text" 
+                id="mintDiscordId" 
+                placeholder="username#1234" 
+                maxlength="50"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label>Avatar Image (Optional)</label>
+              <div class="avatar-upload-section">
+                <div class="avatar-placeholder" id="mintAvatarPreview">
+                  <img src="${DEFAULT_AVATAR}" alt="Default avatar" />
+                </div>
+                <div class="avatar-upload-controls">
+                  <input type="file" id="mintAvatarInput" accept="image/*" style="display: none;" />
+                  <button class="secondary small" id="mintAvatarButton">Choose Avatar</button>
+                  <p class="avatar-info">Max 200x200px, 100KB</p>
+                </div>
+              </div>
+            </div>
+
+            <button id="mintButton" class="mint-button">
+              Mint Membership Card
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async renderProfileForm() {
+    await userProfileManager.initialize();
+    
+    let memberName = '';
+    let discordId = '';
+    let avatarImage = DEFAULT_AVATAR;
+    
+    try {
+      await userProfileManager.getUserInfo();
+      const info = userProfileManager.currentUserInfo;
+      if (info) {
+        memberName = info.memberName || '';
+        discordId = info.discordId || '';
+        avatarImage = info.avatarImage || DEFAULT_AVATAR;
+      }
+    } catch (err) {
+      console.log('No existing profile data');
+    }
+
+    return `
+      <div class="user-profile-container">
+        <div class="profile-header">
+          <h3>Member Profile</h3>
+          <p class="profile-subtitle">Update your membership information</p>
+        </div>
+        
+        <div class="profile-form">
+          <div class="avatar-section">
+            <div class="avatar-preview" id="avatarPreview">
+              <img src="${avatarImage}" alt="Avatar preview" />
+            </div>
+            <div class="avatar-upload">
+              <input type="file" id="avatarInput" accept="image/*" style="display: none;" />
+              <button class="secondary small" id="uploadButton">Choose Avatar</button>
+              <button class="secondary small" id="removeButton" style="${avatarImage === DEFAULT_AVATAR ? 'display: none;' : ''}">Remove</button>
+              <p class="avatar-info">Max 200x200px, 100KB</p>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="memberName">Member Name</label>
+            <input type="text" id="memberName" placeholder="Enter your name" maxlength="50" value="${memberName}" />
+          </div>
+          
+          <div class="form-group">
+            <label for="discordId">Discord ID</label>
+            <input type="text" id="discordId" placeholder="username#1234" maxlength="50" value="${discordId}" />
+          </div>
+          
+          <div class="profile-actions">
+            <button id="saveProfile" class="primary">Save Profile</button>
+          </div>
+          
+          <div id="profileMessage" class="message" style="display: none;"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  attachEventListeners() {
+    // ミントフォームのイベントリスナー
+    const mintButton = document.getElementById('mintButton');
+    if (mintButton) {
+      mintButton.addEventListener('click', () => this.handleMint());
+      
+      const avatarButton = document.getElementById('mintAvatarButton');
+      const avatarInput = document.getElementById('mintAvatarInput');
+      
+      avatarButton.addEventListener('click', () => avatarInput.click());
+      avatarInput.addEventListener('change', (e) => this.handleMintAvatarUpload(e));
+    }
+
+    // プロフィールフォームのイベントリスナー
+    const saveButton = document.getElementById('saveProfile');
+    if (saveButton) {
+      saveButton.addEventListener('click', () => this.handleSaveProfile());
+      
+      const uploadButton = document.getElementById('uploadButton');
+      const avatarInput = document.getElementById('avatarInput');
+      const removeButton = document.getElementById('removeButton');
+      
+      uploadButton.addEventListener('click', () => avatarInput.click());
+      avatarInput.addEventListener('change', (e) => this.handleProfileAvatarUpload(e));
+      removeButton.addEventListener('click', () => this.handleRemoveAvatar());
     }
   }
 
+  async handleMint() {
+    const memberName = document.getElementById('mintMemberName').value.trim();
+    const discordId = document.getElementById('mintDiscordId').value.trim();
+    const avatarImage = document.getElementById('mintAvatarPreview').querySelector('img').dataset.base64 || '';
 
-  async mintNFT() {
-    if (!this.state.mintFormData.memberName.trim()) {
+    if (!memberName) {
+      alert('Please enter your member name');
+      return;
+    }
+
+    if (this.isLoading) return;
+    this.isLoading = true;
+
+    const button = document.getElementById('mintButton');
+    button.innerHTML = '<span class="loading"></span>Minting...';
+    button.disabled = true;
+
+    try {
+      const result = await nftMinter.mint(1);
+      
+      await userProfileManager.initialize();
+      await userProfileManager.setUserInfo({
+        memberName,
+        discordId,
+        avatarImage
+      });
+
+      alert('Membership card minted and profile set!');
+      
+      // ページを再レンダリング
+      await this.render();
+    } catch (error) {
+      console.error('Minting error:', error);
+      alert(error.message || 'Failed to mint membership card');
+      button.innerHTML = 'Mint Membership Card';
+      button.disabled = false;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async handleSaveProfile() {
+    const memberName = document.getElementById('memberName').value.trim();
+    const discordId = document.getElementById('discordId').value.trim();
+    const avatarImage = document.getElementById('avatarPreview').querySelector('img').dataset.base64 || 
+                       document.getElementById('avatarPreview').querySelector('img').src;
+
+    if (!memberName) {
       this.showMessage('Please enter your member name', 'error');
       return;
     }
-    
-    this.setState({ isLoading: true, message: null });
-    
+
+    if (this.isLoading) return;
+    this.isLoading = true;
+
+    const button = document.getElementById('saveProfile');
+    button.innerHTML = '<span class="loading"></span>Saving...';
+    button.disabled = true;
+
     try {
-      this.showMessage('Transaction pending...', 'info');
-      
-      const result = await nftMinter.mint(1);
-      
-      this.showMessage('Membership card minted! Setting up your profile...', 'info');
-      
-      await userProfileManager.initialize();
-      
       await userProfileManager.setUserInfo({
-        memberName: this.state.mintFormData.memberName.trim(),
-        discordId: this.state.mintFormData.discordId.trim() || '',
-        avatarImage: this.state.mintFormData.avatarImage || ''
+        memberName,
+        discordId,
+        avatarImage: avatarImage === DEFAULT_AVATAR ? '' : avatarImage
       });
-      
-      this.setState({ isLoading: false });
-      
-      const explorerUrl = getExplorerUrl(result.transactionHash);
-      const successMessage = explorerUrl 
-        ? `Membership card minted and profile set! <a href="${explorerUrl}" target="_blank" class="transaction-link">View transaction</a>`
-        : `Membership card minted and profile set! Transaction: ${result.transactionHash}`;
-      this.showMessage(successMessage, 'success');
-      
-      this.setState({
-        mintFormData: {
-          memberName: '',
-          discordId: '',
-          avatarImage: null,
-          avatarPreview: null
-        }
-      });
-      
-      await this.loadContractInfo();
+
+      this.showMessage('Profile updated successfully!', 'success');
     } catch (error) {
-      console.error('Minting error:', error);
-      this.setState({ isLoading: false });
-      
-      let errorMessage = 'Failed to mint membership card';
-      if (error.message.includes('already minted')) {
-        errorMessage = 'You have already minted your membership card';
-      } else if (error.message.includes('insufficient funds')) {
-        errorMessage = 'Insufficient funds for gas fees';
-      } else if (error.message.includes('user rejected')) {
-        errorMessage = 'Transaction cancelled by user';
-      }
-      
-      this.showMessage(errorMessage, 'error');
+      console.error('Save error:', error);
+      this.showMessage(error.message || 'Failed to update profile', 'error');
+    } finally {
+      button.innerHTML = 'Save Profile';
+      button.disabled = false;
+      this.isLoading = false;
     }
   }
 
-  async handleAvatarUpload(event) {
+  async handleMintAvatarUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
+
     try {
       const validation = validateImageFile(file, {
         maxSizeMB: 1,
@@ -155,7 +308,7 @@ export class ProfilePage {
       });
       
       if (!validation.valid) {
-        this.showMessage(validation.error, 'error');
+        alert(validation.error);
         return;
       }
       
@@ -167,171 +320,60 @@ export class ProfilePage {
       
       const sizeKB = getBase64SizeKB(base64Image);
       if (sizeKB > 100) {
-        this.showMessage(`Image too large (${sizeKB}KB). Maximum: 100KB`, 'error');
+        alert(`Image too large (${sizeKB}KB). Maximum: 100KB`);
         return;
       }
       
-      this.setState({
-        mintFormData: {
-          ...this.state.mintFormData,
-          avatarImage: base64Image,
-          avatarPreview: base64Image
-        }
-      });
+      const preview = document.getElementById('mintAvatarPreview').querySelector('img');
+      preview.src = base64Image;
+      preview.dataset.base64 = base64Image;
+      
+      document.getElementById('mintAvatarButton').textContent = 'Change Avatar';
     } catch (error) {
-      this.showMessage('Failed to process image', 'error');
+      alert('Failed to process image');
     }
   }
 
-  updateMintForm(field, value) {
-    this.setState({
-      mintFormData: {
-        ...this.state.mintFormData,
-        [field]: value
-      }
-    });
+  async handleProfileAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      const base64Image = await userProfileManager.processAvatarImage(file);
+      
+      const preview = document.getElementById('avatarPreview').querySelector('img');
+      preview.src = base64Image;
+      preview.dataset.base64 = base64Image;
+      
+      document.getElementById('removeButton').style.display = 'inline-block';
+      document.getElementById('uploadButton').textContent = 'Change Avatar';
+    } catch (error) {
+      this.showMessage(error.message, 'error');
+    }
   }
 
-  removeAvatar() {
-    this.setState({
-      mintFormData: {
-        ...this.state.mintFormData,
-        avatarImage: null,
-        avatarPreview: null
-      }
-    });
+  handleRemoveAvatar() {
+    const preview = document.getElementById('avatarPreview').querySelector('img');
+    preview.src = DEFAULT_AVATAR;
+    preview.dataset.base64 = '';
     
-    const fileInput = document.getElementById('mintAvatarInput');
-    if (fileInput) fileInput.value = '';
+    document.getElementById('removeButton').style.display = 'none';
+    document.getElementById('uploadButton').textContent = 'Choose Avatar';
+    document.getElementById('avatarInput').value = '';
   }
 
-  async checkConnection() {
-    await this.updateConnectionStatus();
-  }
+  showMessage(text, type = 'info') {
+    const messageEl = document.getElementById('profileMessage');
+    if (!messageEl) return;
 
-  render() {
-    const pageContent = document.getElementById('page-content');
-    if (!pageContent) return;
+    messageEl.textContent = text;
+    messageEl.className = `message ${type}`;
+    messageEl.style.display = 'block';
 
-
-    pageContent.innerHTML = `
-      <div class="page profile-page">
-        <div class="page-header">
-          <h1>Member Profile</h1>
-          <p class="page-subtitle">Manage your BizenDao membership</p>
-        </div>
-
-        ${this.state.message ? `
-          <div class="message ${this.state.message.type}">
-            ${this.state.message.text}
-          </div>
-        ` : ''}
-
-        ${!this.state.isConnected ? `
-          <div class="wallet-notice">
-            <p>Please connect your wallet using the button in the header to access your profile.</p>
-          </div>
-        ` : ''}
-
-        ${this.state.isConnected ? `
-          ${!this.state.hasMinted ? `
-            <div class="mint-section">
-              ${this.state.contractInfo ? `
-                <div class="contract-info">
-                  <div class="info-item">
-                    <div class="info-label">Price</div>
-                    <div class="info-value">FREE</div>
-                  </div>
-                  <div class="info-item">
-                    <div class="info-label">Minted</div>
-                    <div class="info-value">${this.state.contractInfo.totalSupply}</div>
-                  </div>
-                </div>
-
-                <div class="mint-controls">
-                  <div class="sbt-info">
-                    <p class="sbt-notice">🎫 One membership card per wallet</p>
-                    <p class="sbt-notice">💎 Soul Bound Token (Non-transferable)</p>
-                    <p class="sbt-notice">🆓 Free mint (gas only)</p>
-                  </div>
-
-                  <div class="mint-form">
-                    <h3>Member Information</h3>
-                    
-                    <div class="form-group">
-                      <label for="mintMemberName">Member Name *</label>
-                      <input 
-                        type="text" 
-                        id="mintMemberName" 
-                        placeholder="Enter your name" 
-                        maxlength="50"
-                        value="${this.state.mintFormData.memberName}"
-                        onchange="window.profilePage.updateMintForm('memberName', this.value)"
-                        ${this.state.isLoading ? 'disabled' : ''}
-                      />
-                    </div>
-                    
-                    <div class="form-group">
-                      <label for="mintDiscordId">Discord ID (Optional)</label>
-                      <input 
-                        type="text" 
-                        id="mintDiscordId" 
-                        placeholder="username#1234" 
-                        maxlength="50"
-                        value="${this.state.mintFormData.discordId}"
-                        onchange="window.profilePage.updateMintForm('discordId', this.value)"
-                        ${this.state.isLoading ? 'disabled' : ''}
-                      />
-                    </div>
-                    
-                    <div class="form-group">
-                      <label>Avatar Image (Optional)</label>
-                      <div class="avatar-upload-section">
-                        ${this.state.mintFormData.avatarPreview ? `
-                          <div class="avatar-preview-mint">
-                            <img src="${this.state.mintFormData.avatarPreview}" alt="Avatar preview" />
-                            <button class="remove-avatar" onclick="window.profilePage.removeAvatar()" ${this.state.isLoading ? 'disabled' : ''}>×</button>
-                          </div>
-                        ` : `
-                          <div class="avatar-placeholder">
-                            <img src="${DEFAULT_AVATAR}" alt="Default avatar" />
-                          </div>
-                        `}
-                        <div class="avatar-upload-controls">
-                          <input type="file" id="mintAvatarInput" accept="image/*" style="display: none;" onchange="window.profilePage.handleAvatarUpload(event)" />
-                          <button class="secondary small" onclick="document.getElementById('mintAvatarInput').click()" ${this.state.isLoading ? 'disabled' : ''}>
-                            ${this.state.mintFormData.avatarPreview ? 'Change Avatar' : 'Choose Avatar'}
-                          </button>
-                          <p class="avatar-info">Max 200x200px, 100KB</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button onclick="window.profilePage.mintNFT()" ${this.state.isLoading ? 'disabled' : ''} class="mint-button">
-                      ${this.state.isLoading ? '<span class="loading"></span>Minting...' : 'Mint Membership Card'}
-                    </button>
-                  </div>
-                </div>
-              ` : `
-                <div class="loading-contract">
-                  <span class="loading"></span>
-                  <p>Loading contract information...</p>
-                </div>
-              `}
-            </div>
-          ` : ''}
-          
-          <div id="profileContainer"></div>
-        ` : ''}
-      </div>
-    `;
-    
-    // Insert profile element if it exists
-    if (this.state.profileElement && this.state.hasMinted) {
-      const container = document.getElementById('profileContainer');
-      if (container) {
-        container.appendChild(this.state.profileElement);
-      }
+    if (type !== 'error') {
+      setTimeout(() => {
+        messageEl.style.display = 'none';
+      }, 5000);
     }
   }
 }

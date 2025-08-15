@@ -115,7 +115,6 @@ router.addRoute('shop', () => {
 
 router.addRoute('profile', () => {
   profilePage.render();
-  profilePage.checkConnection();
   updateNavigation('profile');
 });
 
@@ -136,10 +135,7 @@ router.addRoute('contents/*', async (params) => {
 
 // Set up route change listener
 router.setOnRouteChange((route) => {
-  // Clean up profile page if navigating away
-  if (route !== 'profile' && window.profilePage) {
-    window.profilePage.setState({ message: null });
-  }
+  // Route change handling can be added here if needed
 });
 
 // Initialize app

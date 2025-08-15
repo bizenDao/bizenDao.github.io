@@ -11,6 +11,12 @@ class Router {
   }
 
   navigate(path) {
+    // 現在のルートと同じ場合は何もしない
+    const currentHash = window.location.hash.slice(1) || 'home';
+    if (currentHash === path) {
+      return;
+    }
+    
     window.history.pushState({}, '', `#${path}`);
     this.handleRoute();
   }

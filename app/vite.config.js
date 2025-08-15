@@ -11,10 +11,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // MetaMask SDKを独立したチャンクに分割
-          if (id.includes('@metamask/sdk')) {
-            return 'metamask-sdk';
-          }
           // ethersを独立したチャンクに分割
           if (id.includes('ethers')) {
             return 'ethers';
@@ -28,7 +24,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['ethers', '@metamask/sdk'],
+    include: ['ethers'],
   },
   server: {
     host: true,
