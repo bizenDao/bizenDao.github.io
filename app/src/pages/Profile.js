@@ -3,20 +3,54 @@ import { nftMinter } from '../mint';
 import { CHAIN_CONFIG, getExplorerUrl, getCurrencySymbol, isDevelopment, FORCE_PRIVATE_CHAIN } from '../config';
 import { userProfileManager } from '../userProfile';
 import { DEFAULT_AVATAR, processImageToBase64, validateImageFile, getBase64SizeKB } from '../imageUtils';
+import { walletManager } from '../wallet';
 
 export class ProfilePage {
   constructor() {
     this.isLoading = false;
+    this.autoConnectAttempted = false;
   }
 
   async render() {
     const pageContent = document.getElementById('page-content');
     if (!pageContent) return;
 
-    // ウォレット接続状態を確認
-    const { isConnected, account } = header.getConnectionStatus();
+    // モバイル判定
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isMetaMaskBrowser = window.ethereum && window.ethereum.isMetaMask;
     
-    // 基本HTMLをレンダリング
+    // 現在の接続状態を取得
+    let { isConnected, account } = header.getConnectionStatus();
+    
+    // MetaMaskブラウザで未接続なら自動接続（初回のみ）
+    if (!isConnected && isMetaMaskBrowser && !this.autoConnectAttempted) {
+      console.log('Profile: MetaMask browser detected, attempting auto-connect...');
+      this.autoConnectAttempted = true;
+      
+      try {
+        // 既存の接続リクエストがないか確認
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts && accounts.length > 0) {
+          // 既に接続されている場合は、ヘッダーの状態を更新
+          await header.checkConnection();
+          ({ isConnected, account } = header.getConnectionStatus());
+        } else {
+          // 接続されていない場合のみ新規接続
+          await header.connectWallet();
+          ({ isConnected, account } = header.getConnectionStatus());
+        }
+        console.log('Profile: Auto-connect result:', { isConnected, account });
+      } catch (error) {
+        // -32002エラーは無視（既に処理中）
+        if (error.code !== -32002) {
+          console.error('Profile: Auto-connect failed:', error);
+        }
+      }
+    }
+    
+    // モバイルでMetaMaskブラウザ以外の場合、MetaMaskリンクを表示
+    const shouldShowMetaMaskLink = isMobile && !isMetaMaskBrowser;
+    
     let html = `
       <div class="page profile-page">
         <div class="page-header">
@@ -29,6 +63,16 @@ export class ProfilePage {
       html += `
         <div class="wallet-notice">
           <p>Please connect your wallet using the button in the header to access your profile.</p>
+          ${shouldShowMetaMaskLink ? `
+            <div style="margin-top: 1rem;">
+              <p style="margin-bottom: 0.5rem;">モバイルでご利用の場合：</p>
+              <a href="https://metamask.app.link/dapp/${window.location.hostname}${window.location.pathname}${window.location.hash}" 
+                 class="primary" 
+                 style="display: inline-block; padding: 0.5rem 1rem; text-decoration: none; border-radius: 8px;">
+                MetaMaskアプリで開く
+              </a>
+            </div>
+          ` : ''}
         </div>
       </div>
       `;

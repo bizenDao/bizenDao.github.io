@@ -9,6 +9,7 @@ import { mintPage } from './pages/Mint';
 import { ShopPage } from './pages/Shop';
 import { profilePage } from './pages/Profile';
 import { ContentsPage } from './pages/Contents';
+import './utils/mobileConsole';
 
 const app = document.querySelector('#app');
 
@@ -155,7 +156,7 @@ window.addEventListener('walletConnected', (e) => {
   console.log('Wallet connected:', e.detail.account);
   // Profile pageを更新
   if (router.getCurrentRoute() === 'profile' && profilePage) {
-    profilePage.checkConnection();
+    profilePage.render();
   }
   // NFT pageを更新
   if (router.getCurrentRoute() === 'nft' && nftPage) {
@@ -167,12 +168,7 @@ window.addEventListener('walletDisconnected', () => {
   console.log('Wallet disconnected');
   // Profile pageを更新
   if (router.getCurrentRoute() === 'profile' && profilePage) {
-    profilePage.setState({
-      isConnected: false,
-      contractInfo: null,
-      hasMinted: false,
-      profileElement: null
-    });
+    profilePage.render();
   }
   // NFT pageを更新
   if (router.getCurrentRoute() === 'nft' && nftPage) {
