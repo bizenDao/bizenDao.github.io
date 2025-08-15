@@ -1,8 +1,8 @@
-import { ethers } from 'ethers';
-import { CHAIN_CONFIG, CONTRACT_ADDRESSES, TBA_CONFIG } from './config';
-import { walletManager } from './wallet';
-import ERC6551Registry_ABI from './ERC6551Registry_ABI';
-import BizenDaoNFT_ABI from './BizenDaoNFT_ABI';
+import { ethers } from "ethers";
+import { CHAIN_CONFIG, CONTRACT_ADDRESSES, TBA_CONFIG } from "./config";
+import { walletManager } from "./wallet";
+import ERC6551Registry_ABI from "./ERC6551Registry_ABI";
+import BizenDaoNFT_ABI from "./BizenDaoNFT_ABI";
 
 class TBAManager {
   constructor() {
@@ -15,40 +15,46 @@ class TBAManager {
     try {
       // 読み取り専用プロバイダーを初期化
       this.provider = new ethers.JsonRpcProvider(CHAIN_CONFIG.rpcUrls[0]);
-      
+
       // Check if TBA Registry address is valid
-      console.log('TBA Registry address:', CONTRACT_ADDRESSES.TBA_REGISTRY);
-      if (CONTRACT_ADDRESSES.TBA_REGISTRY === '0x0000000000000000000000000000000000000000') {
-        console.warn('TBA Registry not deployed yet');
+      console.log("TBA Registry address:", CONTRACT_ADDRESSES.TBA_REGISTRY);
+      if (
+        CONTRACT_ADDRESSES.TBA_REGISTRY ===
+        "0x0000000000000000000000000000000000000000"
+      ) {
+        console.warn("TBA Registry not deployed yet");
         return false;
       }
-      
+
       // Registry契約を初期化
       this.registryContract = new ethers.Contract(
         CONTRACT_ADDRESSES.TBA_REGISTRY,
         ERC6551Registry_ABI,
         this.provider
       );
-      
+
       // Check if registry contract exists
       const code = await this.provider.getCode(CONTRACT_ADDRESSES.TBA_REGISTRY);
-      console.log('TBA Registry contract code length:', code.length);
-      if (code === '0x') {
-        console.warn('TBA Registry contract not found at address:', CONTRACT_ADDRESSES.TBA_REGISTRY);
+      console.log("TBA Registry contract code length:", code.length);
+      if (code === "0x") {
+        console.warn(
+          "TBA Registry contract not found at address:",
+          CONTRACT_ADDRESSES.TBA_REGISTRY
+        );
         return false;
       }
-      
+
       // NFT契約を初期化（TBA内のNFTを確認するため）
       this.nftContract = new ethers.Contract(
         CONTRACT_ADDRESSES.BIZENDAO_NFT,
         BizenDaoNFT_ABI,
         this.provider
       );
-      
-      console.log('TBA Manager initialized');
+
+      console.log("TBA Manager initialized");
       return true;
     } catch (error) {
-      console.error('Failed to initialize TBA Manager:', error);
+      console.error("Failed to initialize TBA Manager:", error);
       return false;
     }
   }
@@ -70,7 +76,7 @@ class TBAManager {
 
       return address;
     } catch (error) {
-      console.error('Failed to get TBA address:', error);
+      console.error("Failed to get TBA address:", error);
       return null;
     }
   }
@@ -79,7 +85,7 @@ class TBAManager {
   async createTBA(tokenContract, tokenId) {
     try {
       if (!walletManager.isConnected()) {
-        throw new Error('Wallet not connected');
+        throw new Error("Wallet not connected");
       }
 
       const signer = walletManager.getSigner();
@@ -92,33 +98,35 @@ class TBAManager {
       // First check if TBA already exists
       const existingTBA = await this.getTBAAddress(tokenContract, tokenId);
       const exists = await this.isTBACreated(tokenContract, tokenId);
-      
+
       if (exists) {
-        console.log('TBA already exists at:', existingTBA);
+        console.log("TBA already exists at:", existingTBA);
         return existingTBA;
       }
 
-      console.log('Creating TBA with params:', {
+      console.log("Creating TBA with params:", {
         implementation: CONTRACT_ADDRESSES.TBA_IMPLEMENTATION,
         chainId: TBA_CONFIG.CHAIN_ID,
         tokenContract,
         tokenId: tokenId.toString(),
-        salt: TBA_CONFIG.DEFAULT_SALT
+        salt: TBA_CONFIG.DEFAULT_SALT,
       });
 
       // Check implementation contract exists
-      const implCode = await this.provider.getCode(CONTRACT_ADDRESSES.TBA_IMPLEMENTATION);
-      console.log('Implementation contract code length:', implCode.length);
-      if (implCode === '0x') {
-        throw new Error('TBA Implementation contract not found');
+      const implCode = await this.provider.getCode(
+        CONTRACT_ADDRESSES.TBA_IMPLEMENTATION
+      );
+      console.log("Implementation contract code length:", implCode.length);
+      if (implCode === "0x") {
+        throw new Error("TBA Implementation contract not found");
       }
 
       // Check if user is the owner of the NFT
       const owner = await this.nftContract.ownerOf(tokenId);
       const currentUser = await signer.getAddress();
-      
+
       if (owner.toLowerCase() !== currentUser.toLowerCase()) {
-        throw new Error('You must be the owner of this NFT to create a TBA');
+        throw new Error("You must be the owner of this NFT to create a TBA");
       }
 
       // Check what address will be created
@@ -129,20 +137,20 @@ class TBAManager {
         tokenId,
         TBA_CONFIG.DEFAULT_SALT
       );
-      console.log('Predicted TBA address:', predictedAddress);
-      
+      console.log("Predicted TBA address:", predictedAddress);
+
       // Check if there's already code at that address
       const existingCode = await this.provider.getCode(predictedAddress);
-      console.log('Code at predicted address:', existingCode.length);
-      
+      console.log("Code at predicted address:", existingCode.length);
+
       // If TBA already exists, just return the address
       if (existingCode.length > 2) {
-        console.log('TBA already exists at:', predictedAddress);
+        console.log("TBA already exists at:", predictedAddress);
         return predictedAddress;
       }
 
       // createAccountには initData パラメータが必要
-      const initData = '0x'; // 空のバイト配列
+      const initData = "0x"; // 空のバイト配列
 
       const tx = await registryWithSigner.createAccount(
         CONTRACT_ADDRESSES.TBA_IMPLEMENTATION,
@@ -154,29 +162,29 @@ class TBAManager {
         { gasLimit: 500000 } // 固定ガス制限
       );
 
-      console.log('Creating TBA, tx:', tx.hash);
+      console.log("Creating TBA, tx:", tx.hash);
       const receipt = await tx.wait();
-      
+
       // AccountCreatedイベントからTBAアドレスを取得
       const event = receipt.logs
-        .map(log => {
+        .map((log) => {
           try {
             return registryWithSigner.interface.parseLog(log);
           } catch {
             return null;
           }
         })
-        .find(e => e && e.name === 'AccountCreated');
+        .find((e) => e && e.name === "AccountCreated");
 
       if (event) {
-        console.log('TBA created at:', event.args.account);
+        console.log("TBA created at:", event.args.account);
         return event.args.account;
       }
 
       // イベントが見つからない場合は、アドレスを計算して返す
       return await this.getTBAAddress(tokenContract, tokenId);
     } catch (error) {
-      console.error('Failed to create TBA:', error);
+      console.error("Failed to create TBA:", error);
       throw error;
     }
   }
@@ -194,7 +202,7 @@ class TBAManager {
       // "0x"の長さは2なので、それより長い場合はコントラクトが存在する
       return code.length > 2;
     } catch (error) {
-      console.error('Failed to check TBA existence:', error);
+      console.error("Failed to check TBA existence:", error);
       return false;
     }
   }
@@ -212,19 +220,22 @@ class TBAManager {
 
       for (let i = 0; i < balanceNumber; i++) {
         try {
-          const tokenId = await this.nftContract.tokenOfOwnerByIndex(tbaAddress, i);
-          
-          let tokenURI = '';
+          const tokenId = await this.nftContract.tokenOfOwnerByIndex(
+            tbaAddress,
+            i
+          );
+
+          let tokenURI = "";
           let metadata = {};
-          
+
           try {
             tokenURI = await this.nftContract.tokenURI(tokenId);
-            
-            if (tokenURI.startsWith('data:application/json;base64,')) {
-              const base64Data = tokenURI.split(',')[1];
+
+            if (tokenURI.startsWith("data:application/json;base64,")) {
+              const base64Data = tokenURI.split(",")[1];
               const jsonString = atob(base64Data);
               metadata = JSON.parse(jsonString);
-            } else if (tokenURI.includes('arweave.net')) {
+            } else if (tokenURI.includes("arweave.net")) {
               // Arweaveからメタデータを取得
               try {
                 const response = await fetch(tokenURI);
@@ -232,16 +243,10 @@ class TBAManager {
                   metadata = await response.json();
                 }
               } catch (fetchErr) {
-                // CORSエラーの場合はプロキシを使用
-                try {
-                  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(tokenURI)}`;
-                  const proxyResponse = await fetch(proxyUrl);
-                  if (proxyResponse.ok) {
-                    metadata = await proxyResponse.json();
-                  }
-                } catch (proxyErr) {
-                  console.error('Failed to fetch metadata:', proxyErr);
-                }
+                console.error(
+                  "Failed to fetch metadata from Arweave:",
+                  fetchErr
+                );
               }
             }
           } catch (err) {
@@ -252,8 +257,8 @@ class TBAManager {
           if (!metadata.name) {
             metadata = {
               name: `BizenDao NFT #${tokenId}`,
-              description: 'BizenDao NFT',
-              image: './assets/logo.jpg'
+              description: "BizenDao NFT",
+              image: "./assets/logo.png",
             };
           }
 
@@ -263,11 +268,11 @@ class TBAManager {
           nfts.push({
             tokenId: tokenId.toString(),
             name: metadata.name,
-            description: metadata.description || '',
-            image: metadata.image || '/assets/logo.jpg',
+            description: metadata.description || "",
+            image: metadata.image || "/assets/logo.png",
             isLocked,
             creator,
-            tokenURI
+            tokenURI,
           });
         } catch (err) {
           console.error(`Failed to fetch NFT #${i} in TBA:`, err);
@@ -276,7 +281,7 @@ class TBAManager {
 
       return nfts;
     } catch (error) {
-      console.error('Failed to fetch TBA NFTs:', error);
+      console.error("Failed to fetch TBA NFTs:", error);
       return [];
     }
   }

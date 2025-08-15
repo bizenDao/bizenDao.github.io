@@ -62,7 +62,7 @@ export const CHAIN_CONFIG = {
 bizenDao.github.io/
 ├── index.html          # 本番環境用HTML
 ├── assets/             # ビルド済みアセット
-│   └── logo.jpg        # favicon・OGP画像
+│   └── logo.png        # favicon・OGP画像
 ├── docs/               # ドキュメント
 │   ├── DEPLOYMENT.md   # デプロイ手順
 │   └── NFT_MINT_APP.md # アプリ詳細
