@@ -232,16 +232,7 @@ class TBAManager {
                   metadata = await response.json();
                 }
               } catch (fetchErr) {
-                // CORSエラーの場合はプロキシを使用
-                try {
-                  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(tokenURI)}`;
-                  const proxyResponse = await fetch(proxyUrl);
-                  if (proxyResponse.ok) {
-                    metadata = await proxyResponse.json();
-                  }
-                } catch (proxyErr) {
-                  console.error('Failed to fetch metadata:', proxyErr);
-                }
+                console.error('Failed to fetch metadata from Arweave:', fetchErr);
               }
             }
           } catch (err) {

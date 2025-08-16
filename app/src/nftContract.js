@@ -106,22 +106,11 @@ class NFTContract {
                   }
                 } catch (fetchErr) {
                   console.error('Failed to fetch metadata from Arweave:', fetchErr);
-                  // CORSエラーの場合はプロキシを使用
-                  try {
-                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(tokenURI)}`;
-                    const proxyResponse = await fetch(proxyUrl);
-                    if (proxyResponse.ok) {
-                      metadata = await proxyResponse.json();
-                      console.log(`Fetched metadata via proxy:`, metadata);
-                    }
-                  } catch (proxyErr) {
-                    console.error('Proxy fetch also failed:', proxyErr);
-                    metadata = {
-                      name: `BizenDao NFT #${tokenId}`,
-                      description: 'BizenDao NFT',
-                      image: './assets/logo.jpg'
-                    };
-                  }
+                  metadata = {
+                    name: `BizenDao NFT #${tokenId}`,
+                    description: 'BizenDao NFT',
+                    image: './assets/logo.jpg'
+                  };
                 }
               } else {
                 // その他の外部URI
@@ -283,22 +272,11 @@ class NFTContract {
             }
           } catch (fetchErr) {
             console.error('Failed to fetch metadata from Arweave:', fetchErr);
-            // CORSエラーの場合はプロキシを使用
-            try {
-              const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(tokenURI)}`;
-              const proxyResponse = await fetch(proxyUrl);
-              if (proxyResponse.ok) {
-                metadata = await proxyResponse.json();
-                console.log(`Fetched metadata via proxy:`, metadata);
-              }
-            } catch (proxyErr) {
-              console.error('Proxy fetch also failed:', proxyErr);
-              metadata = {
-                name: `BizenDao NFT #${tokenId}`,
-                description: 'BizenDao NFT',
-                image: './assets/logo.jpg'
-              };
-            }
+            metadata = {
+              name: `BizenDao NFT #${tokenId}`,
+              description: 'BizenDao NFT',
+              image: './assets/logo.jpg'
+            };
           }
         } else {
           // その他の外部URI

@@ -71,16 +71,6 @@ export class NftDetailPage {
               }
             } catch (fetchErr) {
               console.error('Failed to fetch from Arweave:', fetchErr);
-              // Try proxy
-              try {
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(tokenURI)}`;
-                const proxyResponse = await fetch(proxyUrl);
-                if (proxyResponse.ok) {
-                  metadata = await proxyResponse.json();
-                }
-              } catch (proxyErr) {
-                console.error('Proxy fetch also failed:', proxyErr);
-              }
             }
           }
         } catch (err) {
