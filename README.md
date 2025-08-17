@@ -1,6 +1,6 @@
-# BizenDao NFT Mint App
+# BizenDao
 
-スマートフォンから簡単に NFT をミントできる Web アプリケーション
+データベース依存しない DAO 向け CMS
 
 ## 🌐 デモ
 

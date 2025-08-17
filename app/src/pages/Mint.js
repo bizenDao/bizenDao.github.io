@@ -490,6 +490,19 @@ export class MintPage {
                 }
               </button>
             </div>
+
+            <div class="metadata-tools-section">
+              <h3>メタデータ作成ツール</h3>
+              <p>NFTのメタデータをオンラインで簡単に作成できます</p>
+              <a href="https://meta.bon-soleil.com/" target="_blank" class="metadata-tool-link">
+                <span class="tool-icon">🛠️</span>
+                <span class="tool-text">
+                  <strong>メタデータジェネレーター</strong>
+                  <small>meta.bon-soleil.com</small>
+                </span>
+                <span class="external-icon">↗</span>
+              </a>
+            </div>
           </div>
         `
         }
