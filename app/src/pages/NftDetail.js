@@ -122,6 +122,30 @@ export class NftDetailPage {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   }
 
+  renderAttributeValue(value) {
+    // URLかどうかを判定
+    if (typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('ipfs://'))) {
+      // 拡張子からMIMEタイプを推測
+      const url = value.toLowerCase();
+      
+      // 画像の場合
+      if (url.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i)) {
+        return `<img src="${value}" alt="Attribute image" class="attribute-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" /><a href="${value}" target="_blank" class="attribute-link" style="display:none;">link <span class="link-icon">↗</span></a>`;
+      }
+      
+      // 3Dモデルの場合
+      if (url.match(/\.(glb|gltf)$/i)) {
+        return `<a href="${value}" target="_blank" class="attribute-link attribute-3d">3D Model <span class="link-icon">↗</span></a>`;
+      }
+      
+      // その他のURLの場合
+      return `<a href="${value}" target="_blank" class="attribute-link">link <span class="link-icon">↗</span></a>`;
+    }
+    
+    // URL以外の場合はそのまま表示
+    return value;
+  }
+
   async loadTBAInfo(tokenId) {
     try {
       const initialized = await tbaManager.initialize();
@@ -326,15 +350,15 @@ export class NftDetailPage {
                     ? `
                   <div class="nft-detail-section">
                     <h3>属性</h3>
-                    <div class="attributes-grid">
+                    <div class="attributes-list">
                       ${this.state.nft.attributes
                         .map(
                           (attr) => `
-                        <div class="attribute-card">
-                          <div class="attribute-type">${
+                        <div class="attribute-item">
+                          <span class="attribute-label">${
                             attr.trait_type || "Property"
-                          }</div>
-                          <div class="attribute-value">${attr.value}</div>
+                          }</span>
+                          <span class="attribute-content">${this.renderAttributeValue(attr.value)}</span>
                         </div>
                       `
                         )

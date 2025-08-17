@@ -36,6 +36,25 @@ export class MintPage {
     }
   }
 
+  renderAttributeValue(value) {
+    // URLかどうかを判定
+    if (typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('ipfs://'))) {
+      // 拡張子からMIMEタイプを推測
+      const url = value.toLowerCase();
+      
+      // 画像の場合
+      if (url.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i)) {
+        return `<img src="${value}" alt="Attribute" class="preview-attribute-image" />`;
+      }
+      
+      // その他のURLの場合はテキストのみ
+      return value;
+    }
+    
+    // URL以外の場合はそのまま表示
+    return value;
+  }
+
   async checkConnection() {
     const { isConnected, account } = header.getConnectionStatus();
     this.setState({ isConnected });
@@ -422,9 +441,10 @@ export class MintPage {
                           ${this.state.previewMetadata.attributes
                             .map(
                               (attr) => `
-                            <span class="attribute-tag">
-                              ${attr.trait_type}: ${attr.value}
-                            </span>
+                            <div class="preview-attribute-item">
+                              <span class="preview-attribute-label">${attr.trait_type}:</span>
+                              <span class="preview-attribute-value">${this.renderAttributeValue(attr.value)}</span>
+                            </div>
                           `
                             )
                             .join("")}
