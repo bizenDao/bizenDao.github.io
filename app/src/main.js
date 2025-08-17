@@ -6,7 +6,9 @@ import { HomePage } from './pages/Home';
 import { nftPage } from './pages/Nft';
 import { nftDetailPage } from './pages/NftDetail';
 import { mintPage } from './pages/Mint';
-import { ShopPage } from './pages/Shop';
+import { shopPage } from './pages/Shop';
+import { createItemPage } from './pages/CreateItem';
+import { itemDetailPage } from './pages/ItemDetail';
 import { profilePage } from './pages/Profile';
 import { ContentsPage } from './pages/Contents';
 import './utils/mobileConsole';
@@ -110,7 +112,8 @@ router.addRoute('mint', () => {
 });
 
 router.addRoute('shop', () => {
-  renderPage(ShopPage());
+  shopPage.render();
+  shopPage.loadItems();
   updateNavigation('shop');
 });
 
@@ -125,6 +128,20 @@ router.addRoute('nft/:id', (params) => {
   nftDetailPage.render();
   nftDetailPage.loadNFTDetail(tokenId);
   // 詳細ページではナビゲーションを更新しない
+});
+
+// 商品作成ページのルート
+router.addRoute('shop/create', () => {
+  createItemPage.render();
+  updateNavigation('shop');
+});
+
+// 商品詳細ページのルート（パラメータ付き）
+router.addRoute('shop/item/:id', (params) => {
+  const tokenId = params.id;
+  itemDetailPage.render();
+  itemDetailPage.loadItemDetail(tokenId);
+  updateNavigation('shop');
 });
 
 // Contentsページのルート（動的パス）
@@ -143,12 +160,15 @@ router.setOnRouteChange((route) => {
 createAppStructure();
 router.init();
 
-// Make router, profilePage, nftPage, nftDetailPage, mintPage and header available globally
+// Make router, profilePage, nftPage, nftDetailPage, mintPage, shopPage, createItemPage, itemDetailPage and header available globally
 window.router = router;
 window.profilePage = profilePage;
 window.nftPage = nftPage;
 window.nftDetailPage = nftDetailPage;
 window.mintPage = mintPage;
+window.shopPage = shopPage;
+window.createItemPage = createItemPage;
+window.itemDetailPage = itemDetailPage;
 window.header = header;
 
 // Listen for wallet events
