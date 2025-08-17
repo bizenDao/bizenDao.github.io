@@ -104,7 +104,10 @@ export class NftDetailPage {
       const { account } = header.getConnectionStatus();
       const isOwner = account && owner.toLowerCase() === account.toLowerCase();
 
-      this.setState({ isLoading: false, nft, isOwner });
+      // animation_urlがある場合はanimationタブをデフォルトにする
+      const defaultTab = nft.animationUrl ? "animation" : "image";
+      
+      this.setState({ isLoading: false, nft, isOwner, activeTab: defaultTab });
 
       // Load TBA information
       await this.loadTBAInfo(tokenId);
@@ -130,7 +133,7 @@ export class NftDetailPage {
       
       // 画像の拡張子がある場合
       if (url.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i)) {
-        return `<img src="${value}" alt="Attribute image" class="attribute-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" /><a href="${value}" target="_blank" class="attribute-link" style="display:none;">link <span class="link-icon">↗</span></a>`;
+        return `<img src="${value}" alt="Attribute image" class="attribute-image clickable-image" onclick="window.nftDetailPage.showImageModal('${value}')" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" /><a href="${value}" target="_blank" class="attribute-link" style="display:none;">link <span class="link-icon">↗</span></a>`;
       }
       
       // 3Dモデルの場合
@@ -140,7 +143,7 @@ export class NftDetailPage {
       
       // Arweave URLの場合、画像として試してみる
       if (value.includes('arweave.net')) {
-        return `<img src="${value}" alt="Attribute image" class="attribute-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" /><a href="${value}" target="_blank" class="attribute-link" style="display:none;">link <span class="link-icon">↗</span></a>`;
+        return `<img src="${value}" alt="Attribute image" class="attribute-image clickable-image" onclick="window.nftDetailPage.showImageModal('${value}')" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" /><a href="${value}" target="_blank" class="attribute-link" style="display:none;">link <span class="link-icon">↗</span></a>`;
       }
       
       // その他のURLの場合
@@ -849,6 +852,23 @@ export class NftDetailPage {
     if (modal) {
       modal.remove();
     }
+  }
+
+  showImageModal(imageUrl) {
+    const modal = document.createElement("div");
+    modal.className = "modal-overlay image-modal-overlay";
+    modal.innerHTML = `
+      <div class="image-modal-content">
+        <button class="image-modal-close" onclick="window.nftDetailPage.closeModal()">×</button>
+        <img src="${imageUrl}" alt="Expanded image" class="expanded-image" />
+      </div>
+    `;
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        this.closeModal();
+      }
+    };
+    document.body.appendChild(modal);
   }
 
   async transferNFT() {

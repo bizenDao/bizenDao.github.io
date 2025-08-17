@@ -1628,15 +1628,16 @@ button.small {
 
 .media-tabs {
   display: flex;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
+  gap: 0.25rem;
+  margin-bottom: 0;
 }
 
 .media-tab {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  background: transparent;
-  border: none;
+  padding: 0.75rem 1.5rem;
+  background: #f0f0f0;
+  border: 1px solid #e0e0e0;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1645,18 +1646,21 @@ button.small {
   color: #666;
   font-size: 0.9rem;
   transition: all 0.2s ease;
-  border-bottom: 2px solid transparent;
+  position: relative;
+  margin-bottom: -1px;
 }
 
 .media-tab:hover {
-  background: #f0f0f0;
+  background: #e8e8e8;
   color: #333;
 }
 
 .media-tab.active {
-  color: #667eea;
+  color: #333;
   background: white;
-  border-bottom-color: #667eea;
+  border-color: #e0e0e0;
+  z-index: 1;
+  font-weight: 600;
 }
 
 .tab-icon {
@@ -1676,6 +1680,9 @@ button.small {
   justify-content: center;
   background: #000;
   position: relative;
+  border: 1px solid #e0e0e0;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
 }
 
 .media-viewer img {
@@ -1860,6 +1867,15 @@ button.small {
   object-fit: contain;
   margin-left: auto;
   display: block;
+}
+
+.clickable-image {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.clickable-image:hover {
+  opacity: 0.8;
 }
 
 /* 属性内のリンクスタイル */
@@ -2264,6 +2280,46 @@ button.small {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* 画像モーダルスタイル */
+.image-modal-overlay {
+  background: rgba(0, 0, 0, 0.9);
+  cursor: pointer;
+}
+
+.image-modal-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-modal-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+  transition: opacity 0.2s;
+}
+
+.image-modal-close:hover {
+  opacity: 0.7;
+}
+
+.expanded-image {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .modal-content h2 {
