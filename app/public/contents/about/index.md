@@ -1,6 +1,4 @@
-MD FILE VIEWER
-
-# 【備前焼の種類について】
+# About Bizen DAO
 
 ## 意外と沢山ある備前焼の種類について解説します！
 
@@ -15,3 +13,11 @@ MD FILE VIEWER
 #### 私が作った作品をご紹介します！
 
 #### [Niya の初作品](https://opensea.io/assets/matic/0x45dba7994c4d0f802a7d9ff55f61993342a81707/1)
+
+### CONTRIBUTE
+
+BizenDAO では記事管理を github で行っております。
+記事投稿希望の方は、プルリクエストを出してください。
+公開ページは以下のディレクトリになります。
+
+https://github.com/bizenDao/bizenDao.github.io/tree/main/app/public/contents
