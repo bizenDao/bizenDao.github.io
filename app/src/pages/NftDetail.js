@@ -128,7 +128,7 @@ export class NftDetailPage {
       // 拡張子からMIMEタイプを推測
       const url = value.toLowerCase();
       
-      // 画像の場合
+      // 画像の拡張子がある場合
       if (url.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i)) {
         return `<img src="${value}" alt="Attribute image" class="attribute-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" /><a href="${value}" target="_blank" class="attribute-link" style="display:none;">link <span class="link-icon">↗</span></a>`;
       }
@@ -136,6 +136,11 @@ export class NftDetailPage {
       // 3Dモデルの場合
       if (url.match(/\.(glb|gltf)$/i)) {
         return `<a href="${value}" target="_blank" class="attribute-link attribute-3d">3D Model <span class="link-icon">↗</span></a>`;
+      }
+      
+      // Arweave URLの場合、画像として試してみる
+      if (value.includes('arweave.net')) {
+        return `<img src="${value}" alt="Attribute image" class="attribute-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" /><a href="${value}" target="_blank" class="attribute-link" style="display:none;">link <span class="link-icon">↗</span></a>`;
       }
       
       // その他のURLの場合

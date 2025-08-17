@@ -42,9 +42,14 @@ export class MintPage {
       // 拡張子からMIMEタイプを推測
       const url = value.toLowerCase();
       
-      // 画像の場合
+      // 画像の拡張子がある場合
       if (url.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i)) {
         return `<img src="${value}" alt="Attribute" class="preview-attribute-image" />`;
+      }
+      
+      // Arweave URLの場合、画像として試してみる
+      if (value.includes('arweave.net')) {
+        return `<img src="${value}" alt="Attribute" class="preview-attribute-image" onerror="this.style.display='none'; this.parentElement.innerHTML='${value}'" />`;
       }
       
       // その他のURLの場合はテキストのみ
