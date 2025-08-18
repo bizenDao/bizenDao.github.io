@@ -1075,10 +1075,19 @@ button.small {
   border-radius: 8px;
   cursor: pointer;
   transition: transform 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
 }
 
 .cta-button:hover {
   transform: scale(1.05);
+}
+
+.cta-button img {
+  width: 24px;
+  height: 24px;
 }
 
 /* NFT Page */
@@ -1560,7 +1569,7 @@ button.small {
 
 .mint-cta h2 {
   margin: 0 0 1rem 0;
-  font-size: 2rem;
+  font-size: 1.5rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1572,6 +1581,35 @@ button.small {
   font-size: 1.1rem;
   margin: 0 0 2rem 0;
 }
+
+/* Profile CTA section */
+.profile-cta {
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.1) 0%,
+    rgba(118, 75, 162, 0.1) 100%
+  );
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.profile-cta h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.profile-cta p {
+  color: #666;
+  margin: 0 0 2rem 0;
+  font-size: 1.1rem;
+}
+
 
 @media (max-width: 768px) {
   .nft-grid {
@@ -2954,13 +2992,22 @@ button.small {
 
 .shop-cta h2 {
   margin: 0 0 1rem 0;
-  color: #333;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .shop-cta p {
   color: #666;
   margin: 0 0 2rem 0;
   font-size: 1.1rem;
+}
+
+.shop-cta .cta-button .icon {
+  font-size: 1.2rem;
+  margin-right: 0.25rem;
 }
 
 @media (max-width: 768px) {

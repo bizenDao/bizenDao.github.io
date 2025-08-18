@@ -1,6 +1,7 @@
 import { header } from "../components/Header";
 import { nftContract } from "../nftContract";
 import { AddressDisplay } from "../components/AddressDisplay";
+import { shouldShowMetaMaskRedirect } from "../utils/detectBrowser";
 
 export class NftPage {
   constructor() {
@@ -90,6 +91,7 @@ export class NftPage {
 
     const { isConnected } = header.getConnectionStatus();
     const filteredNFTs = this.getFilteredNFTs();
+    const showMetaMaskLink = shouldShowMetaMaskRedirect();
 
     pageContent.innerHTML = `
       <div class="page nft-page">
@@ -239,13 +241,25 @@ export class NftPage {
         `
         }
 
-        <div class="mint-cta">
-          <h2>Want to join BizenDao?</h2>
-          <p>Mint your membership NFT to become part of our community</p>
-          <button onclick="window.router.navigate('profile')" class="cta-button">
-            ${isConnected ? "Mint Membership NFT" : "Connect Wallet to Mint"}
-          </button>
-        </div>
+        ${showMetaMaskLink && !isConnected ? `
+          <div class="mint-cta">
+            <h2>MetaMaskでアクセス</h2>
+            <p>モバイルでご利用の場合は、MetaMaskアプリからアクセスしてください</p>
+            <a href="https://metamask.app.link/dapp/${window.location.hostname}${window.location.pathname}${window.location.hash}" 
+               class="cta-button">
+              <img src="/assets/metamaskicon.svg" alt="MetaMask" width="24" height="24" />
+              MetaMaskで開く
+            </a>
+          </div>
+        ` : `
+          <div class="mint-cta">
+            <h2>Want to join BizenDao?</h2>
+            <p>Mint your membership NFT to become part of our community</p>
+            <button onclick="window.router.navigate('profile')" class="cta-button">
+              ${isConnected ? "Mint Membership NFT" : "Connect Wallet to Mint"}
+            </button>
+          </div>
+        `}
       </div>
     `;
   }

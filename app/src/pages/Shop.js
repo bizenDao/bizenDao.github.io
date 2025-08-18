@@ -2,6 +2,7 @@ import { header } from "../components/Header";
 import { daoShopContract } from "../daoShopContract";
 import { AddressDisplay } from "../components/AddressDisplay";
 import { walletManager } from "../wallet";
+import { shouldShowMetaMaskRedirect } from "../utils/detectBrowser";
 
 export class ShopPage {
   constructor() {
@@ -106,6 +107,7 @@ export class ShopPage {
 
     const { isConnected } = header.getConnectionStatus();
     const filteredItems = this.getFilteredItems();
+    const showMetaMaskLink = shouldShowMetaMaskRedirect();
 
     pageContent.innerHTML = `
       <div class="page shop-page">
@@ -145,16 +147,6 @@ export class ShopPage {
                 : ""
             }
           </div>
-          ${
-            isConnected
-              ? `
-            <button class="create-item-button" onclick="window.router.navigate('shop/create')">
-              <span class="icon">+</span>
-              商品を出品
-            </button>
-          `
-              : ""
-          }
         </div>
 
         ${
@@ -236,7 +228,19 @@ export class ShopPage {
         }
 
         ${
-          !isConnected
+          showMetaMaskLink && !isConnected
+            ? `
+          <div class="shop-cta">
+            <h2>MetaMaskでアクセス</h2>
+            <p>モバイルでご利用の場合は、MetaMaskアプリからアクセスしてください</p>
+            <a href="https://metamask.app.link/dapp/${window.location.hostname}${window.location.pathname}${window.location.hash}" 
+               class="cta-button">
+              <img src="/assets/metamaskicon.svg" alt="MetaMask" width="24" height="24" />
+              MetaMaskで開く
+            </a>
+          </div>
+        `
+            : !isConnected
             ? `
           <div class="shop-cta">
             <h2>商品を出品しませんか？</h2>
@@ -246,7 +250,16 @@ export class ShopPage {
             </button>
           </div>
         `
-            : ""
+            : `
+          <div class="shop-cta">
+            <h2>商品を出品</h2>
+            <p>あなたの商品やサービスをDAOメンバーに共有しましょう</p>
+            <button class="cta-button" onclick="window.router.navigate('shop/create')">
+              <span class="icon">+</span>
+              商品を出品する
+            </button>
+          </div>
+        `
         }
       </div>
     `;

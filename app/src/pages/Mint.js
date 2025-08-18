@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import { CHAIN_CONFIG, CONTRACT_ADDRESSES } from "../config";
 import BizenDaoNFT_ABI from "../BizenDaoNFT_ABI";
 import { AddressDisplay } from "../components/AddressDisplay";
+import { shouldShowMetaMaskRedirect } from "../utils/detectBrowser";
 
 export class MintPage {
   constructor() {
@@ -312,6 +313,8 @@ export class MintPage {
     const pageContent = document.getElementById("page-content");
     if (!pageContent) return;
 
+    const showMetaMaskLink = shouldShowMetaMaskRedirect();
+
     pageContent.innerHTML = `
       <div class="page mint-page">
         <div class="page-header">
@@ -335,6 +338,26 @@ export class MintPage {
           <div class="wallet-notice">
             <p>NFTをミントするにはウォレットを接続してください</p>
           </div>
+          
+          ${showMetaMaskLink ? `
+            <div class="mint-cta">
+              <h2>MetaMaskでアクセス</h2>
+              <p>モバイルでご利用の場合は、MetaMaskアプリからアクセスしてください</p>
+              <a href="https://metamask.app.link/dapp/${window.location.hostname}${window.location.pathname}${window.location.hash}" 
+                 class="cta-button">
+                <img src="/assets/metamaskicon.svg" alt="MetaMask" width="24" height="24" />
+                MetaMaskで開く
+              </a>
+            </div>
+          ` : `
+            <div class="mint-cta">
+              <h2>BizenDao NFTをミント</h2>
+              <p>ウォレットを接続して、独自のNFTを作成しましょう</p>
+              <button onclick="window.walletManager.connect()" class="cta-button">
+                ウォレットを接続
+              </button>
+            </div>
+          `}
         `
             : `
           <div class="mint-form-container">
