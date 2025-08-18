@@ -625,6 +625,48 @@ button.small {
   border-color: #9ca3af;
 }
 
+.wallet-button.metamask-redirect {
+  background: #f6851b;
+  color: white;
+  border-color: #f6851b;
+}
+
+.wallet-button.metamask-redirect:hover {
+  background: #e2761b;
+  border-color: #e2761b;
+  transform: translateY(-1px);
+}
+
+.wallet-icon.metamask {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* MetaMask icon-only button */
+.wallet-button.metamask-icon-only {
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.wallet-button.metamask-icon-only:hover {
+  background: rgba(246, 133, 27, 0.1);
+  transform: translateY(-1px);
+}
+
+.wallet-button.metamask-icon-only svg {
+  width: 32px;
+  height: 32px;
+}
+
 .wallet-icon {
   display: flex;
   align-items: center;
